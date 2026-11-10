@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#241628"></head><body>
 
 
 <title>Cake Princess</title>
@@ -884,7 +884,7 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(0,0,W,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-10d',W-44,H-12,11,'#ffe9cf99');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-10e',W-44,H-12,11,'#ffe9cf99');
   txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b'),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
@@ -941,6 +941,7 @@ function cpGfx(){const L=cpS.gfx=='auto'?cpLvl:CPG.indexOf(cpS.gfx)-1,w=document
  const ms=L==2?2048:1024;if(dl.shadow.mapSize.x!==ms){dl.shadow.mapSize.set(ms,ms);if(dl.shadow.map){dl.shadow.map.dispose();dl.shadow.map=null}}}
 try{cpGfx()}catch(e){cpErr('Grafik: '+e.message)}
 let cpRsT=0;addEventListener('resize',()=>{clearTimeout(cpRsT);cpRsT=setTimeout(()=>{try{cpGfx()}catch(e){}},200)});
+if('serviceWorker'in navigator&&location.protocol!=='file:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
 let last=performance.now();
 (function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;cpFoc=!document.hidden&&document.hasFocus();
  for(const gp of pads())if(gp.buttons.some(b=>b.pressed)){cpPadT=cpPT(gp.id);break}
