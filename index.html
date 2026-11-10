@@ -21,14 +21,17 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 button{font:inherit;padding:6px 18px;border-radius:999px;border:2px solid var(--ink);background:var(--card);color:var(--ink)}
 summary{cursor:pointer;font-weight:800;text-align:center}details{max-width:960px;font-size:15px}.row{display:flex;gap:10px}
 p{margin:0;max-width:960px;font-size:15px;line-height:1.35;text-align:center}
+#help{position:absolute;inset:0;display:none;z-index:5;overflow:auto;touch-action:pan-y;overscroll-behavior:contain;background:#241628f2;color:#ffe9cf;font-size:max(11px,calc(min(100vw,177.8vh)*.016));line-height:1.35;padding:1em 1.6em}
+#help h3{margin:.2em 0 .4em;font-size:1.3em}#help table{border-collapse:collapse;margin-bottom:.8em}#help td{padding:.15em .8em .15em 0;vertical-align:top}#help td+td{font-weight:800;color:#ffd23f}
+#helpX{position:sticky;top:0;float:right;font-size:1em;padding:.2em .9em}
 </style>
 
 
-<div class="wrap"><canvas id="gl" width="960" height="540"></canvas><canvas id="c" width="960" height="540"></canvas></div>
+<div class="wrap"><canvas id="gl" width="960" height="540"></canvas><canvas id="c" width="960" height="540"></canvas><div id="help"><button id="helpX">Schließen</button><div id="helpIn"></div></div></div>
 <div id="rot"><div style="font-size:56px">📱↻</div>Bitte Handy quer drehen</div><div id="err"></div>
 <div class="row"><button id="mu">Musik: an</button><button id="fs">Vollbild</button><button id="bl">Blut: an</button></div>
 <p>Tipp: Handy quer halten. Controller anschließen, 4 gegen 4, freie Plätze übernehmen Bots.</p>
-<details><summary>Steuerung &amp; Regeln</summary><p style="text-align:left;margin-top:8px">Handy: Bildschirm quer drehen. Links wischen = laufen, rechts tippen = schlagen, kleiner Knopf = Prinzessin oder Kuchen ablegen. Controller: Stick + A (B = ablegen), bis zu 4 Spieler. Tastatur: WASD + Leertaste (E = ablegen) bzw. Pfeiltasten + Enter (Shift rechts = ablegen). Klassen holst du dir an den Hüten in deiner Burg: Krieger schlägt, Magier und Jäger schießen, Priester heilt, Arbeiter repariert das Tor, stellt Fallen und sammelt Holz (Bäume) und Erz (Adern in der Mitte), das er in der eigenen Burg abgibt. Turm in der Mitte: je mehr Spieler daneben stehen, desto schneller wird er eingenommen. Nur das haltende Team kommt hinein und heilt sich dort. Ziel: Rette deine Prinzessin aus dem Kerker der Gegner (Treppe runter) und setze sie auf deinen Thron. Fütter die gegnerische Prinzessin in deinem Kerker mit Kuchen, damit sie schwer wird: je dicker, desto langsamer der Träger, und Mitspieler in der Nähe machen ihn wieder schneller. Kampf: dreimal schnell schlagen = Finisher mit Wucht. Angriff gedrückt halten, bis der Balken gelb ist, dann loslassen = aufgeladener Angriff (Krieger Wirbelwind, Jäger Durchschlagpfeil, Magier Riesen-Feuerball, Priester Massenheilung mit Schild, Arbeiter Schmetterschlag, Bürger Wuchtschlag). Anvisieren: L1 gedrückt halten (Tastatur R bzw. Semikolon, Handy Fadenkreuz-Knopf). Der nächste Gegner bekommt einen gelben Ring und du blickst auf ihn. Zielwechsel bei gehaltenem L1: rechter Stick oder Steuerkreuz links/rechts (Tastatur Z/X bzw. [ / ]). Blocken (normaler Krieger): Controller L2, Tastatur F bzw. Komma, Handy Schild-Knopf. Der Schild fängt Angriffe und Pfeile von vorn ab; Finisher und aufgeladene Angriffe kommen abgeschwächt durch. Der Glefenkrieger stürmt beim aufgeladenen Angriff nach vorn und trifft alles auf dem Weg. Gefallene Hüte bleiben liegen: Stell dich drauf und drück den Ablegen-Knopf (Kreis). Du hebst den Hut hoch, es puffert, und nach etwa 1 Sekunde verwandelst du dich in die Klasse (auch verbesserte). Währenddessen stehst du still, ein Treffer unterbricht und der Hut fällt wieder zu Boden. Kuchen wachsen an hellen Tellern nach. Kuchen essen: Ablegen-Knopf mit Kuchen in der Hand gedrückt halten (ca. 1 Sekunde, du sitzt still, Treffer unterbrechen) heilt 3 Leben; kurz tippen legt den Kuchen ab. Das Gewicht der Prinzessin geht von selbst zurück: etwa alle 14 Sekunden verliert sie einen Kuchen, neues Füttern setzt den Zeitraum zurück. Ausweichrolle: Controller RB, Tastatur Shift links bzw. /, Handy Wolken-Knopf. Jedes Tor hat zwei Flügel und lässt sich aufschlagen; einen zerstörten Flügel baut der Arbeiter für 3 Holz wieder auf (sonst steht er nach 30 Sekunden von selbst wieder). Pause: P, Start-Taste oder oben auf den Bildschirm tippen; dort „Weiter“, „Blut: an/aus“ oder „Zurück zum Menü“ wählen. Blut lässt sich auch mit dem Knopf unter dem Spielfeld ausschalten und wird gespeichert. Verbessern: Der Arbeiter schlägt länger auf eines der eigenen Hut-Gebäude (kostet 6 Holz und 3 Erz, wie beim Tor). Danach gibt der Hut die verbesserte Klasse aus: Glefenkrieger (größere Reichweite), Schrotjäger (Schrotflinte), Eismagier (Feuerball lähmt), Dunkelpriester (vergiftet Gegner), Bombenarbeiter (wirft Bomben, kann damit aber nichts abbauen). Zwischen normaler und verbesserter Klasse wechselst du jederzeit mit Dreieck (Controller), Q bzw. Punkt (Tastatur) oder dem 🔁-Knopf (Handy). Verbesserte Spieler tragen einen goldenen Ring. Magische Hüte: Auf den lila Sockeln oben in deiner Burg liegen Pirat, Ninja und Riese (nur für Spieler, nicht verbesserbar). Wer so einen Hut trägt, hat eine eigene Leiste, die sich in etwa 30 Sekunden füllt und dann blinkt. Dann aktivierst du den Spezialangriff mit Dreieck (Tastatur Q bzw. Punkt, Handy 🔁-Knopf). Pirat: feuert eine Kanonenkugel mit Flächenschaden. Ninja: wird 8 Sekunden unsichtbar (Gegner und Bots können ihn nicht anvisieren), der nächste Schlag macht dreifachen Schaden; ein Treffer oder Schlag enttarnt ihn. Riese: frisst den nächsten Gegner in Reichweite und heilt dabei 5 Leben (ohne Gegner in der Nähe passiert nichts).</p></details>
+<details><summary>Steuerung &amp; Regeln</summary><p id="rules" style="text-align:left;margin-top:8px">Handy: Bildschirm quer drehen. Links wischen = laufen, rechts tippen = schlagen, kleiner Knopf = Prinzessin oder Kuchen ablegen. Controller: Stick + {a} ({b} = ablegen), bis zu 4 Spieler. Tastatur: WASD + Leertaste (E = ablegen) bzw. Pfeiltasten + Enter (Shift rechts = ablegen). Klassen holst du dir an den Hüten in deiner Burg: Krieger schlägt, Magier und Jäger schießen, Priester heilt, Arbeiter repariert das Tor, stellt Fallen und sammelt Holz (Bäume) und Erz (Adern in der Mitte), das er in der eigenen Burg abgibt. Turm in der Mitte: je mehr Spieler daneben stehen, desto schneller wird er eingenommen. Nur das haltende Team kommt hinein und heilt sich dort. Ziel: Rette deine Prinzessin aus dem Kerker der Gegner (Treppe runter) und setze sie auf deinen Thron. Fütter die gegnerische Prinzessin in deinem Kerker mit Kuchen, damit sie schwer wird: je dicker, desto langsamer der Träger, und Mitspieler in der Nähe machen ihn wieder schneller. Kampf: dreimal schnell schlagen = Finisher mit Wucht. Angriff gedrückt halten, bis der Balken gelb ist, dann loslassen = aufgeladener Angriff (Krieger Wirbelwind, Jäger Durchschlagpfeil, Magier Riesen-Feuerball, Priester Massenheilung mit Schild, Arbeiter Schmetterschlag, Bürger Wuchtschlag). Anvisieren: {lb} gedrückt halten (Tastatur R bzw. Semikolon, Handy Fadenkreuz-Knopf). Der nächste Gegner bekommt einen gelben Ring und du blickst auf ihn. Zielwechsel bei gehaltenem {lb}: rechter Stick oder Steuerkreuz links/rechts (Tastatur Z/X bzw. [ / ]). Blocken (normaler Krieger): Controller {lt}, Tastatur F bzw. Komma, Handy Schild-Knopf. Der Schild fängt Angriffe und Pfeile von vorn ab; Finisher und aufgeladene Angriffe kommen abgeschwächt durch. Der Glefenkrieger stürmt beim aufgeladenen Angriff nach vorn und trifft alles auf dem Weg. Gefallene Hüte bleiben liegen: Stell dich drauf und drück den Ablegen-Knopf ({b}). Du hebst den Hut hoch, es puffert, und nach etwa 1 Sekunde verwandelst du dich in die Klasse (auch verbesserte). Währenddessen stehst du still, ein Treffer unterbricht und der Hut fällt wieder zu Boden. Kuchen wachsen an hellen Tellern nach. Kuchen essen: Ablegen-Knopf mit Kuchen in der Hand gedrückt halten (ca. 1 Sekunde, du sitzt still, Treffer unterbrechen) heilt 3 Leben; kurz tippen legt den Kuchen ab. Das Gewicht der Prinzessin geht von selbst zurück: etwa alle 14 Sekunden verliert sie einen Kuchen, neues Füttern setzt den Zeitraum zurück. Ausweichrolle: Controller {rb}, Tastatur Shift links bzw. /, Handy Wolken-Knopf. Jedes Tor hat zwei Flügel und lässt sich aufschlagen; einen zerstörten Flügel baut der Arbeiter für 3 Holz wieder auf (sonst steht er nach 30 Sekunden von selbst wieder). Pause: P, {start} oder oben in der Mitte auf den Bildschirm tippen; dort „Weiter“, „Steuerung“, „Musik“, „Blut“ oder „Zurück zum Menü“ wählen. Die Blut-Einstellung wird gespeichert. Verbessern: Der Arbeiter schlägt länger auf eines der eigenen Hut-Gebäude (kostet 6 Holz und 3 Erz, wie beim Tor). Danach gibt der Hut die verbesserte Klasse aus: Glefenkrieger (größere Reichweite), Schrotjäger (Schrotflinte), Eismagier (Feuerball lähmt), Dunkelpriester (vergiftet Gegner), Bombenarbeiter (wirft Bomben, kann damit aber nichts abbauen). Zwischen normaler und verbesserter Klasse wechselst du jederzeit mit {y} (Controller), Q bzw. Punkt (Tastatur) oder dem 🔁-Knopf (Handy). Verbesserte Spieler tragen einen goldenen Ring. Magische Hüte: Auf den lila Sockeln oben in deiner Burg liegen Pirat, Ninja und Riese (nur für Spieler, nicht verbesserbar). Wer so einen Hut trägt, hat eine eigene Leiste, die sich in etwa 30 Sekunden füllt und dann blinkt. Dann aktivierst du den Spezialangriff mit {y} (Tastatur Q bzw. Punkt, Handy 🔁-Knopf). Pirat: feuert eine Kanonenkugel mit Flächenschaden. Ninja: wird 8 Sekunden unsichtbar (Gegner und Bots können ihn nicht anvisieren), der nächste Schlag macht dreifachen Schaden; ein Treffer oder Schlag enttarnt ihn. Riese: frisst den nächsten Gegner in Reichweite und heilt dabei 5 Leben (ohne Gegner in der Nähe passiert nichts).</p></details>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const cpErrEl=document.getElementById('err');let cpErrT=0;
@@ -67,12 +70,14 @@ function magicUse(p){if((p.mp||0)<1||p.cls<6||p.carry||p.stun>0)return;const T=p
   if(!b){if(!(p.nt>performance.now())){p.nt=performance.now()+1500;KF.push({t:2,s:'Kein Gegner in Reichweite'})}return}
   p.mp=0;p.cd=.8;p.sw=.3;b.shd=0;b.blk=false;const d=Math.hypot(b.x-p.x,b.y-p.y)||1;hurt(b,99,(b.x-p.x)/d,(b.y-p.y)/d,0,0,p.i);p.hp=Math.min(CLS[8].hp,p.hp+5);sfx('feed');shake=Math.max(shake,12);hitStop=.1;pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:90,col:0x6be36b});fx(p.x,p.y,40,14,0,120,120,300,.5,1.8)}}
 function blockFx(q){q.bw=.35;const x=q.x+q.fx*18,y=q.y+q.fy*18;fx(x,y,30,10,0,190,110,500,.35,1.6);fx(x,y,30,8,3,230,100,500,.3,1.3);pulses.push({x,y,life:.2,max:.2,r:34,col:0xffe066});sfx('pick');rumble(q,80,.3,.4);shake=Math.max(shake,3)}
-function pauseAct(i){if(i==1){mu.onclick();sfx('pick');return}if(i==2){setBlood(!BLOOD);sfx('pick');return}paused=false;if(i==3)reset()}
-function pauseNav(){let u=!!(keys.ArrowUp||keys.KeyW),d=!!(keys.ArrowDown||keys.KeyS),a=!!(keys.Enter||keys.Space);
- for(const gp of pads()){const b=n=>gp.buttons[n]&&gp.buttons[n].pressed,ay=gp.axes[1]||0;if(b(12)||ay<-.6)u=true;if(b(13)||ay>.6)d=true;if(b(0))a=true}
- if(u&&!pnp.u){pmi=(pmi+3)%4;sfx('pick')}if(d&&!pnp.d){pmi=(pmi+1)%4;sfx('pick')}
- if(a&&!pnp.a)pauseAct(pmi);
- pnp.u=u;pnp.d=d;pnp.a=a}
+function pauseAct(i){if(i==1){cpHelpShow(true);sfx('pick');return}if(i==2){mu.onclick();sfx('pick');return}if(i==3){setBlood(!BLOOD);sfx('pick');return}paused=false;if(i==4)reset()}
+function pauseNav(dt){let u=!!(keys.ArrowUp||keys.KeyW),d=!!(keys.ArrowDown||keys.KeyS),a=!!(keys.Enter||keys.Space),bk=!!(keys.Backspace||keys.Escape);
+ for(const gp of pads()){const b=n=>gp.buttons[n]&&gp.buttons[n].pressed,ay=gp.axes[1]||0;if(b(12)||ay<-.6)u=true;if(b(13)||ay>.6)d=true;if(b(0))a=true;if(b(1))bk=true}
+ if(cpHelpOn){if(cpHelpK!==cpPadT+cpMode())cpHelpShow(true);if(u!=d)cpHelpEl.scrollTop+=(d?1:-1)*600*dt;
+  if((a&&!pnp.a)||(bk&&!pnp.b)){cpHelpShow(false);sfx('pick')}pnp.u=u;pnp.d=d;pnp.a=a;pnp.b=bk;return}
+ if(u&&!pnp.u){pmi=(pmi+4)%5;sfx('pick')}if(d&&!pnp.d){pmi=(pmi+1)%5;sfx('pick')}
+ if(a&&!pnp.a)pauseAct(pmi);else if(bk&&!pnp.b){paused=false;sfx('pick')}
+ pnp.u=u;pnp.d=d;pnp.a=a;pnp.b=bk}
 function chargeAtk(p){const c=p.cls,T=p.team;p.cd=1;p.sw=.3;p.ct=0;rumble(p,220,1,.7);if(c==0||c==2)zoomK=1;
  if(c==0&&p.up){p.cd=.9;p.lng=.22;p.lh2=[];p.lg=0;p.sw=.3;shake=Math.max(shake,6);sfx('swing')}
  else if(c==0){p.spin=.35;pulses.push({x:p.x,y:p.y,life:.35,max:.35,r:80,col:0xdfe8f2});shake=Math.max(shake,10);hitStop=.08;sfx('hit');
@@ -153,8 +158,8 @@ addEventListener('keyup',e=>keys[e.code]=0);
 const tc={dx:0,dy:0,a:false,d:false,did:null,r:false,rid:null,c:false,cid:null,sid:null,aid:null,b:false,bid:null,l:false,lid:null,ox:0,oy:0,cx:0,cy:0};
 function pt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
 cv.addEventListener('pointerdown',e=>{e.preventDefault();join('t');const q=pt(e);{window.CZ=window.CZ||{n:0,t:0};if(q.x<70&&q.y<70){const nw=performance.now();CZ.n=nw-CZ.t<2500?CZ.n+1:1;CZ.t=nw;if(CZ.n>=5){CZ.n=0;cheatUp()}return}}
- if(paused){for(let i=0;i<4;i++)if(q.x>330&&q.x<630&&q.y>200+i*58&&q.y<250+i*58){pmi=i;pauseAct(i);return}}
- if(q.y<50&&Math.abs(q.x-W/2)<110){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=1;return}
+ if(paused){for(let i=0;i<5;i++)if(q.x>330&&q.x<630&&q.y>190+i*52&&q.y<236+i*52){pmi=i;pauseAct(i);return}}
+ if(q.y<50&&Math.abs(q.x-W/2)<110){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;return}
  if(paused)return;
  if(q.x<W/2){if(tc.sid===null){tc.sid=e.pointerId;tc.ox=tc.cx=q.x;tc.oy=tc.cy=q.y;tc.dx=tc.dy=0}}
  else if(Math.hypot(q.x-620,q.y-440)<42){tc.bid=e.pointerId;tc.b=true}
@@ -173,10 +178,28 @@ cv.addEventListener('pointerup',tend);cv.addEventListener('pointercancel',tend);
 let AC=null,musicOn=true,mstep=0;
 function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();startMusic()}catch(e){}}if(AC&&AC.state=='suspended')AC.resume()}
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,ac));
+// Tastensymbole passend zum Controller (PS: ✕○□△ L1/R1/L2/R2, sonst Xbox)
+let cpPadT='xb',cpHelpOn=false,cpHelpK='';
+const CPB={ps:{a:'✕',b:'○',x:'□',y:'△',lb:'L1',rb:'R1',lt:'L2',rt:'R2',start:'Options'},xb:{a:'A',b:'B',x:'X',y:'Y',lb:'LB',rb:'RB',lt:'LT',rt:'RT',start:'Start'}};
+const CPK={a:['Leertaste','Enter','⚔️'],b:['E','Shift rechts','⬇️'],rb:['Shift links','/','💨'],y:['Q','.','🔁'],lt:['F',',','🛡️'],lb:['R',';','🎯'],start:['P','P','oben Mitte']};
+function cpPT(id){return /054c|playstation|dualsense|dualshock|wireless controller/i.test(id||'')?'ps':'xb'}
+function cpBtn(k){return CPB[cpPadT][k]||k}
+function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:src=='k2'?1:2;return(CPK[k]||[k,k,k])[i]}
+function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':(players.some(p=>p.src=='t')||navigator.maxTouchPoints>0)?'t':'k'}
+function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
+addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
+const cpHelpEl=document.getElementById('help'),cpRulesEl=document.getElementById('rules');
+function cpHelpShow(on){cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
+ const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtn;cpHelpK=cpPadT+m;
+ const R=[['Laufen',['Stick / Steuerkreuz','WASD (P2: Pfeiltasten)','links wischen']],['Angreifen (halten = aufladen)',[B('a')+' / '+B('x'),'Leertaste (P2: Enter)','⚔️']],['Ablegen, Hut aufheben, Kuchen essen (halten)',[B('b'),'E (P2: Shift rechts)','⬇️']],['Ausweichrolle',[B('rb')+' / '+B('rt'),'Shift links (P2: /)','💨']],['Klasse wechseln / Spezial',[B('y'),'Q (P2: .)','🔁']],['Blocken',[B('lt'),'F (P2: ,)','🛡️']],['Anvisieren (halten)',[B('lb'),'R (P2: ;)','🎯']],['Ziel wechseln',[B('lb')+' + rechter Stick oder ←/→','Z / X (P2: [ / ])','–']],['Pause',[B('start'),'P','oben in der Mitte tippen']]];
+ const hd=['Controller ('+(cpPadT=='ps'?'PlayStation':'Xbox')+')','Tastatur','Touch'][c],cl=m=='p'?B('b')+' / '+B('a'):m=='k'?'Enter / Rücktaste':'„Schließen“';
+ document.getElementById('helpIn').innerHTML='<h3>Steuerung – '+hd+'</h3><table>'+R.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1][c]+'</td></tr>').join('')+'</table><div>Schließen: '+cl+(m=='t'?'':' · Blättern: '+(m=='p'?'Stick':'Pfeiltasten'))+'</div><h3 style="margin-top:.8em">Regeln</h3><div>'+(cpRulesEl?cpRulesEl.innerHTML.replace(/\{(\w+)\}/g,(x,k)=>B(k)):'')+'</div>';
+ if(cpHelpEl.style.display!='block'){cpHelpEl.style.display='block';cpHelpEl.scrollTop=0}}
+document.getElementById('helpX').onclick=()=>{cpHelpShow(false);sfx('pick')};
 const mu=document.getElementById('mu');mu.onclick=()=>{ac();musicOn=!musicOn;mu.textContent='Musik: '+(musicOn?'an':'aus')};
 // Handy-Grundlagen: Vollbild, Zurück-Taste, Wake Lock, Pause beim Verlassen, Fokus
 let cpFoc=true,cpHist=false,cpWL=null;
-function cpPauseIf(){if(!menu&&over<0&&!paused){paused=true;pmi=0;pnp.u=pnp.d=pnp.a=1}}
+function cpPauseIf(){if(!menu&&over<0&&!paused){paused=true;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1}}
 function cpFS(){const d=document,el=d.documentElement;if(d.fullscreenElement||d.webkitFullscreenElement)return;const f=el.requestFullscreen||el.webkitRequestFullscreen;if(!f)return;
  const lk=()=>{try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};
  try{const r=f.call(el,{navigationUI:'hide'});if(r&&r.then)r.then(lk).catch(()=>{});else lk()}catch(e){}}
@@ -317,7 +340,7 @@ function botInput(p){
 function step(dt){
  {window.L3s=window.L3s||{};for(const gp of pads()){const on=!!(gp.buttons[10]&&gp.buttons[10].pressed);if(on&&!L3s[gp.index]){const pl=players.find(q=>q.src=='p'+gp.index);cheatUp(pl?pl.team:null)}L3s[gp.index]=on}}
  const stb=pads().some(gp=>gp.buttons[9]&&gp.buttons[9].pressed)||keys.KeyP;
- if(stb&&!pz){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=1}pz=!!stb;if(paused){pauseNav();return}
+ if(stb&&!pz){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1}pz=!!stb;if(paused){pauseNav(dt);return}
  if(paused)return;
  if(hitStop>0){hitStop-=dt;return}
  if(over>=0){overT-=dt;if(overT<10&&players.some(p=>p.src&&readInput(p).a))overT=-1;if(overT<0)reset();return}
@@ -329,7 +352,7 @@ function step(dt){
    {const dr=inp.dx<-.5?-1:inp.dx>.5?1:0;if(dr&&!p.dxp){const tm=dr<0?0:1;if(!p.pick){if(players.filter(q=>q!==p&&q.src&&q.pick&&q.team==tm).length<NP/2){p.team=tm;p.pick=true;p.ready=false;p.hopT=performance.now();sfx('pick')}}else if(tm!=p.team){p.pick=false;p.ready=false;p.hopT=performance.now();sfx('pick')}}p.dxp=dr}
    if(inp.ro&&!p.rp){DIFF=(DIFF+1)%3;sfx('pick')}p.rp=!!inp.ro;
    if(inp.a&&!p.prev&&p.mt>.5&&p.pick){p.ready=!p.ready;sfx('lift')}p.prev=!!inp.a;
-   if(inp.d&&!p.dp&&players.filter(q=>q!==p&&q.src&&q.pick&&q.team==1-p.team).length<NP/2){p.team=1-p.team;p.pick=true;p.ready=false;p.hopT=performance.now();sfx('pick')}p.dp=!!inp.d}
+   if(inp.d&&!p.dp){if(p.ready){p.ready=false;sfx('pick')}else if(p.pick){p.pick=false;p.hopT=performance.now();sfx('pick')}}p.dp=!!inp.d}
   balance();
   if(players.some(q=>q.src)&&players.every(q=>!q.src||q.ready)){menu=false;cdown=3.2;players.forEach(respawn);sfx('score')}
   return}
@@ -808,7 +831,7 @@ function draw(){
  for(const p of players){if(p.dead>0){const h=sp(HOME[p.team].x+(p.team?-50:50)*SCL,HH/2,60);txt((p.src?'P'+pnum(p):'Bot')+' ↻ '+Math.ceil(p.dead),h.x,h.y+(p.i>>1)*16,16,'#fff');continue}if(p.inv>0){if(players.some(v=>v.src&&v.team==p.team)){const w=sp(p.x,p.y,8);g.globalAlpha=.55;g.strokeStyle='#2a1610';g.lineWidth=3;g.setLineDash([5,4]);g.beginPath();g.ellipse(w.x,w.y,17,9,0,0,7);g.stroke();g.setLineDash([]);txt('Ninja (unsichtbar)',w.x,w.y-22,13,'#3a2340');g.globalAlpha=1}continue}const q=sp(p.x,p.y,p.cake?112:96);
   txt((p.src?'P'+pnum(p):'Bot')+' '+cn(p)+(p.pz>0?' ☠':'')+(p.shd>0?' 🛡️':'')+(p.spd>0?' 👟':'')+(p.it?(p.it.k?' ⛏️':' 🪵'):''),q.x,q.y-12,16,'#3a2340');
   for(let h=0,n=CLS[p.cls].hp;h<n;h++)circ(q.x-(n-1)*4+h*8,q.y,3,h<p.hp?'#fff':'#0005');if(p.ch>.25){const f=Math.min(1,(p.ch-.25)/.55);g.fillStyle='#0008';g.fillRect(q.x-17,q.y+5,34,7);g.fillStyle=f>=1?'#ffd23f':'#fff';g.fillRect(q.x-16,q.y+6,32*f,5)}
-  if(p.cls>=6){const f=p.mp||0,full=f>=1;g.fillStyle='#0008';g.fillRect(q.x-17,q.y+5,34,7);g.fillStyle=full?(Math.floor(performance.now()/180)%2?'#ffd23f':'#fff'):'#b06be0';g.fillRect(q.x-16,q.y+6,32*f,5);if(full&&p.src)txt('Spezial: Dreieck / Q',q.x,q.y-28,12,'#3a2340')}
+  if(p.cls>=6){const f=p.mp||0,full=f>=1;g.fillStyle='#0008';g.fillRect(q.x-17,q.y+5,34,7);g.fillStyle=full?(Math.floor(performance.now()/180)%2?'#ffd23f':'#fff'):'#b06be0';g.fillRect(q.x-16,q.y+6,32*f,5);if(full&&p.src)txt('Spezial: '+cpKey(p.src,'y'),q.x,q.y-28,12,'#3a2340')}
   if(p.tf){const f=Math.max(0,Math.min(1,1-p.tf.t));g.fillStyle='#0008';g.fillRect(q.x-17,q.y+5,34,7);g.fillStyle='#ffd23f';g.fillRect(q.x-16,q.y+6,32*f,5)}
   if(p.ep>0){const f=Math.min(1,p.ep/1.1);g.fillStyle='#0008';g.fillRect(q.x-17,q.y+5,34,7);g.fillStyle='#6be36b';g.fillRect(q.x-16,q.y+6,32*f,5)}
   else if(p.src&&p.cake&&p.hp<CLS[p.cls].hp)txt('Ablegen halten: essen',q.x,q.y-28,12,'#3a2340')}
@@ -820,7 +843,7 @@ function draw(){
     g.save();g.translate(ax,ay);g.rotate(Math.atan2(dy,dx));g.fillStyle=COL[lp.team];g.strokeStyle='#2a1610';g.lineWidth=3;g.beginPath();g.moveTo(14,0);g.lineTo(-8,-10);g.lineTo(-8,10);g.closePath();g.fill();g.stroke();g.restore();
     txt('Prinzessin',ax,ay-16,13,'#3a2340')}}}
  
- for(const d of hatDrops){if(d.cls>4||d.t<.7)continue;const q=sp(d.x,d.y,50);txt(d.up?'★ '+UN[d.cls]:CLS[d.cls].n,q.x,q.y,13,'#3a2340');if(players.some(p=>p.src&&!p.tf&&p.dead<=0&&Math.hypot(p.x-d.x,p.y-d.y)<70))txt('Kreis / Ablegen-Knopf: aufheben',q.x,q.y-15,12,'#3a2340')}
+ for(const d of hatDrops){if(d.cls>4||d.t<.7)continue;const q=sp(d.x,d.y,50);txt(d.up?'★ '+UN[d.cls]:CLS[d.cls].n,q.x,q.y,13,'#3a2340');{const hp=players.find(p=>p.src&&!p.tf&&p.dead<=0&&Math.hypot(p.x-d.x,p.y-d.y)<70);if(hp)txt(cpKey(hp.src,'b')+': aufheben',q.x,q.y-15,12,'#3a2340')}}
  if(!menu&&over<0&&cdown<=0)for(const p of players){if(!p.src||p.dead>0||!p.carry)continue;const th=THR[p.team],a=sp(p.x,p.y,70),b=sp(th.x,th.y,30),dx=b.x-a.x,dy=b.y-a.y;if(Math.hypot(dx,dy)<90)continue;const wd=Math.hypot(th.x-p.x,th.y-p.y),nr=Math.max(0,1-wd/1600),k=1+.28*Math.sin(performance.now()*(.005+.016*nr)),ang=Math.atan2(dy,dx),r=58;
   g.save();g.translate(a.x+Math.cos(ang)*r,a.y+Math.sin(ang)*r);g.rotate(ang);g.scale(k,k);g.fillStyle='#ffd23f';g.strokeStyle='#2a1610';g.lineWidth=3;g.beginPath();g.moveTo(16,0);g.lineTo(-8,-11);g.lineTo(-3,0);g.lineTo(-8,11);g.closePath();g.fill();g.stroke();g.restore();
   txt('Thron',a.x+Math.cos(ang)*(r+28),a.y+Math.sin(ang)*(r+28)+5,13,'#3a2340')}
@@ -835,8 +858,8 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(0,0,W,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-10b',W-44,H-12,11,'#ffe9cf99');
-  txt('Stick links = Rot, rechts = Blau, zur Mitte = zurück. Bereit: A / Leertaste / Schwert-Knopf.',W/2,96,16,'#ffe9cf');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-10c',W-44,H-12,11,'#ffe9cf99');
+  txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b'),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
   txt('◀   wählen   ▶',W/2,154,16,'#ffe9cf');
@@ -862,16 +885,16 @@ function draw(){
   if(!players.some(p=>p.src))txt('Drücke eine Taste oder tippe auf den Bildschirm',W/2,480,24,'#fff');
   else if(players.some(p=>p.src&&!p.pick))txt('Wähle deine Seite: Stick nach links oder rechts',W/2,478,20,'#ffe9cf');
   else txt('Bereit: '+players.filter(p=>p.src&&p.ready).length+' von '+players.filter(p=>p.src).length+'. Das Spiel startet, sobald alle bereit sind. Bots füllen auf 4 gegen 4 auf.',W/2,478,18,'#ffe9cf');
-  txt('Bots: '+['Leicht','Normal','Schwer'][DIFF]+' (Ausweichen: RB / Shift links / Wolken-Knopf)',W/2,512,19,'#fff')}
+  txt('Bots: '+['Leicht','Normal','Schwer'][DIFF]+' (ändern: '+cpML('rb')+')',W/2,512,19,'#fff')}
  else if(cdown>0)txt(Math.ceil(cdown-.2)>0?Math.ceil(cdown-.2)+'':'Los!',W/2,H/2+30,120,'#fff');
  if(!players.some(p=>p.src)&&!menu)txt('Tippen oder Taste drücken zum Mitspielen',W/2,H-24,22,'#3a2340');
  if(players.some(p=>p.src=='t')){
   const sx=tc.sid!==null?tc.ox:110,sy=tc.sid!==null?tc.oy:420;
   g.globalAlpha=.45;circ(sx,sy,55,'#fff');circ(tc.sid!==null?tc.cx:sx,tc.sid!==null?tc.cy:sy,26,'#3a2340');
   circ(850,420,56,tc.a?'#fff':'#3a2340');circ(730,460,40,tc.d?'#fff':'#3a2340');circ(860,310,40,tc.r?'#fff':'#3a2340');circ(740,345,36,tc.c?'#fff':'#3a2340');circ(620,440,36,tc.b?'#fff':'#3a2340');circ(620,350,36,tc.l?'#fff':'#3a2340');g.globalAlpha=1;g.font='30px serif';g.fillText('💨',860,321);g.fillText('🔁',740,356);g.fillText('🛡️',620,451);g.fillText('🎯',620,361);g.fillText('⬇️',730,471);g.font='44px serif';g.textAlign='center';g.fillText('⚔️',850,435)}
- if(paused){g.fillStyle='#0008';g.fillRect(0,0,W,H);txtO('Pause',W/2,185,64,'#fff');
-  ['Weiter','Musik: '+(musicOn?'an':'aus'),'Blut: '+(BLOOD?'an':'aus'),'Zurück zum Menü'].forEach((s,i)=>{const y=200+i*58,on=pmi==i;hrr(330,y,300,50,25);g.fillStyle=on?'#ffd23f':'#fff3e2';g.fill();g.lineWidth=on?6:3;g.strokeStyle='#2a1610';g.stroke();txt((on?'▶ ':'')+s,W/2,y+34,25,'#3a2340')});
-  txt('Stick/Pfeile wählen, A/Enter bestätigen, P/Start = weiter',W/2,455,18,'#ffe9cf')}
+ if(paused){g.fillStyle='#0008';g.fillRect(0,0,W,H);txtO('Pause',W/2,165,64,'#fff');
+  ['Weiter','Steuerung','Musik: '+(musicOn?'an':'aus'),'Blut: '+(BLOOD?'an':'aus'),'Zurück zum Menü'].forEach((s,i)=>{const y=190+i*52,on=pmi==i;hrr(330,y,300,46,23);g.fillStyle=on?'#ffd23f':'#fff3e2';g.fill();g.lineWidth=on?6:3;g.strokeStyle='#2a1610';g.stroke();txt((on?'▶ ':'')+s,W/2,y+31,23,'#3a2340')});
+  {const m=cpMode();txt(m=='p'?'Stick wählen · '+cpBtn('a')+' bestätigen · '+cpBtn('b')+' = weiter':m=='t'?'Zum Wählen antippen · oben Mitte = weiter':'Pfeile wählen · Enter bestätigen · P / Rücktaste = weiter',W/2,475,18,'#ffe9cf')}}
  if(MSG&&MSG.t>0&&!menu&&!paused){g.globalAlpha=Math.min(1,MSG.t*2);txtO(MSG.s,W/2,H/2-70,38,'#fff');g.globalAlpha=1}
  if(over>=0){g.fillStyle='#000c';g.fillRect(0,0,W,H);
   txt('Team '+NAME[over]+' gewinnt!',W/2,90,60,'#fff');
@@ -885,6 +908,8 @@ function draw(){
 reset();
 let last=performance.now();
 (function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;cpFoc=!document.hidden&&document.hasFocus();
+ for(const gp of pads())if(gp.buttons.some(b=>b.pressed)){cpPadT=cpPT(gp.id);break}
+ if(cpHelpOn&&!paused)cpHelpShow(false);
  try{for(const p of players)if(!Number.isFinite(p.x+p.y+p.hp+p.dead)){p.kx=p.ky=0;p.stun=0;p.dash=0;respawn(p)}
   if(!Number.isFinite(camX+camZ+camH)){camX=camZ=0;camH=520}}catch(e){cv.err=e}
  try{step(dt)}catch(e){cv.err=e}
