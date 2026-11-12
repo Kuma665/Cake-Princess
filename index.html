@@ -429,7 +429,7 @@ function step(dt){
   if(p.dead>0){if(p.tf){hatDrops.push({x:p.x,y:p.y,cls:p.tf.cls,up:p.tf.up,team:p.tf.team,t:.8,life:14,rot:0});p.tf=null}p.dead-=dt;if(p.dead<=0)respawn(p);continue}
   const inp=readInput(p);
   if(p.stun>0){p.stun-=dt;inp.dx=inp.dy=0;inp.a=false;inp.d=false;inp.ro=false;p.prev=false;p.ch=0}
-  if(p.eatg>0){p.eatg-=dt;inp.dx=inp.dy=0;inp.a=false}if(p.gst>0){p.gst-=dt;inp.dx=inp.dy=0;inp.a=false;p.prev=false;if(p.gst<=0)gStomp(p)}if(p.gsl>0)p.gsl-=dt;
+  if(p.eatg>0){p.eatg-=dt;inp.dx=inp.dy=0;inp.a=false}if(p.gst>0){p.gst-=dt;inp.dx=inp.dy=0;inp.a=false;p.prev=false;if(p.gst<=0&&p.cls==8)gStomp(p)}if(p.gsl>0)p.gsl-=dt;
   if(p.tf){const tf=p.tf;inp.dx=inp.dy=0;inp.a=false;inp.d=false;inp.ro=false;tf.t-=dt;
    if(p.stun>0||p.hp<tf.hp){hatDrops.push({x:p.x,y:p.y,cls:tf.cls,up:tf.up,team:tf.team,t:.8,life:14,rot:0});p.tf=null;sfx('hit')}
    else if(tf.t<=0){p.cls=tf.cls;p.upk=tf.up;p.up=tf.up;p.hp=CLS[tf.cls].hp;p.tf=null;sfx('pick');shake=Math.max(shake,4);pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:80,col:tf.up?0xffd23f:0xffffff});fx(p.x,p.y,50,18,3,170,120,300,.55,2);rumble(p,100,.4,.6)}}
@@ -487,7 +487,7 @@ function step(dt){
   // cakes
   if(!p.cake&&!p.carry&&!p.it&&(p.cn||0)<=0)for(let k=cakes.length-1;k>=0;k--)if(Math.hypot(cakes[k].x-p.x,cakes[k].y-p.y)<22){cakes.splice(k,1);p.cake=true;p.pk=.5;sfx('pick');break}
   const ep=prin[p.team],op=prin[1-p.team];
-  let hpk=!!p.src&&dpr&&!p.cake&&!p.it&&(p.ln||0)<=0&&p.nl<=0&&!p.bc&&p.cls!=8;for(const h of HATS){if(h.cd>0||p.carry||(p.src&&!hpk)||(p.cls==h.k&&(p.up||0)==UPG[h.t][h.k])||Math.hypot(h.x-p.x,h.y-p.y)>(p.src?32:24))continue;p.cls=h.k;p.upk=UPG[h.t][h.k];p.up=(!p.src&&h.k==4)?0:p.upk;p.hp=CLS[h.k].hp;p.cake=false;h.cd=1.2;sfx('lift');hpk=false;break}
+  let hpk=!!p.src&&dpr&&!p.cake&&!p.it&&(p.ln||0)<=0&&p.nl<=0&&!p.bc;for(const h of HATS){if(h.cd>0||p.carry||(p.src&&!hpk)||(p.cls==h.k&&(p.up||0)==UPG[h.t][h.k])||Math.hypot(h.x-p.x,h.y-p.y)>(p.src?32:24))continue;p.cls=h.k;p.upk=UPG[h.t][h.k];p.up=(!p.src&&h.k==4)?0:p.upk;p.hp=CLS[h.k].hp;p.cake=false;h.cd=1.2;sfx('lift');hpk=false;break}
   for(const h of MH){if(!hpk||h.cd>0||p.carry||p.tf||p.zh||Math.hypot(h.x-p.x,h.y-p.y)>32)continue;p.zh=1;p.zc=0;p.zw=ZW;p.zs=ZF[0];h.cd=20;hpk=false;KF.push({t:2,s:'Zauberhut! '+cpKey(p.src,'y')+' = Kraft wählen'});sfx('lift');pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:70,col:0xb06be0});fx(p.x,p.y,40,14,3,140,100,300,.5,1.8);break}
   for(let k=hatDrops.length-1;k>=0;k--){const d=hatDrops[k];if(d.cls>4||d.t<.7||p.carry||p.it||p.cake||p.tf||p.bc||(p.src&&!hpk)||Math.hypot(d.x-p.x,d.y-p.y)>40)continue;
    if(d.cls==p.cls&&d.up==(p.up||0))continue;
@@ -541,7 +541,7 @@ function holey(w,h,cx,cz,hs){const sh=new THREE.Shape(),x0=cx-w/2,x1=cx+w/2,y0=-
  sh.moveTo(x0,y0);sh.lineTo(x1,y0);sh.lineTo(x1,y1);sh.lineTo(x0,y1);sh.lineTo(x0,y0);
  for(const r of hs){const q=new THREE.Path();q.moveTo(r[0],-r[3]);q.lineTo(r[1],-r[3]);q.lineTo(r[1],-r[2]);q.lineTo(r[0],-r[2]);q.lineTo(r[0],-r[3]);sh.holes.push(q)}
  return new THREE.ShapeGeometry(sh)}
-const gr=mesh(holey(W+300,H+300,0,0,HOLES),0x9ad36b,0,0,0);gr.rotation.x=-Math.PI/2;
+const gr=mesh(holey(W+900,H+500,0,0,HOLES),0x9ad36b,0,0,0);gr.rotation.x=-Math.PI/2;
 
 for(const t of [0,1]){
  const z=mesh(holey(250,H,t?W/2-125:-W/2+125,0,[HOLES[t]]),COL[t].replace('#','0x')*1,0,.6,0);z.rotation.x=-Math.PI/2;z.material.transparent=true;z.material.opacity=.2;
@@ -907,7 +907,7 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(-DX,0,SW,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12d',W-44+DX,H-12,11,'#ffe9cf99');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12e',W-44+DX,H-12,11,'#ffe9cf99');
   txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b')+(cpMode()=='k'?' · Maus: Seite nochmal anklicken = bereit':''),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
