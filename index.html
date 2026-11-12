@@ -46,6 +46,7 @@ function cpLoad(){let o=null;try{o=JSON.parse(localStorage.getItem('cpSet')||'nu
 const cpS=cpLoad();function cpSave(){try{localStorage.setItem('cpSet',JSON.stringify(cpS))}catch(e){}}
 const cv=document.getElementById('c'),g=cv.getContext('2d');
 const NP=8,W=960,H=540,COL=['#e8455a','#3f7fe0'],NAME=['Rot','Blau'],WIN=3;
+let cpNeedR=true; // Pause: 3D-Szene nur neu zeichnen, wenn nötig (Standbild)
 let SW=960,DX=0; // Bildschirmbreite fürs HUD (16:9 bis 21:9), DX = Versatz des 960er-Bereichs (Mitte)
 const HOME=[{x:165,y:270},{x:795,y:270}],PH=[{x:870,y:270},{x:90,y:270}],THR=[{x:190,y:440},{x:770,y:440}];
 const TW={x:480,y:270,r:44,z:80,p:0,owner:-1};
@@ -875,7 +876,7 @@ function hud(){
     g.fillStyle='#5ad1ff';g.strokeStyle='#2a1610';g.beginPath();g.moveTo(rx+72,19);g.lineTo(rx+82,29);g.lineTo(rx+72,39);g.lineTo(rx+62,29);g.closePath();g.fill();g.lineWidth=2.5;g.stroke();g.fillStyle='rgba(255,255,255,.7)';g.beginPath();g.moveTo(rx+72,22);g.lineTo(rx+77,29);g.lineTo(rx+72,29);g.closePath();g.fill();
     txtO(rs.e,rx+89,37,18,'#fff','left')}}}}
 function draw(){
- g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,SW,H);g.setTransform(1,0,0,1,DX,0);render3D();
+ g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,SW,H);g.setTransform(1,0,0,1,DX,0);if(!paused||cpNeedR){cpNeedR=false;render3D()}
  for(const pr of prin){const q=sp(pr.x,pr.y,95+pr.f*4);txt((pr.f>=5?'zu fett!':'Kuchen '+pr.f+'/5')+(pr.by&&pr.f>=3?' · Helfer '+(pr.hn||0):''),q.x,q.y,17,'#3a2340');if(pr.cryT>0)txt('Hilfe!',q.x,q.y-20,18,'#e8455a');{const T=pr.f>=5?null:(pr.f>=4?'Ich platze fast!':'Mehr Kuchen!');if(T&&!pr.by&&!menu&&((performance.now()/1000+pr.t*3.5)%8)<2.2){const w=T.length*7.4+18,bx=q.x-w/2,by=q.y-50;hrr(bx,by,w,24,12);g.fillStyle='#fff';g.fill();g.lineWidth=2;g.strokeStyle='#2a1610';g.stroke();g.beginPath();g.moveTo(q.x-5,by+23);g.lineTo(q.x,by+31);g.lineTo(q.x+5,by+23);g.fillStyle='#fff';g.fill();txt(T,q.x,by+18,15,'#3a2340')}}}
  for(const p of players){if(p.dead>0){const h=sp(HOME[p.team].x+(p.team?-50:50)*SCL,HH/2,60);txt((p.src?'P'+pnum(p):'Bot')+' ↻ '+Math.ceil(p.dead),h.x,h.y+(p.i>>1)*16,16,'#fff');continue}if(p.inv>0){if(players.some(v=>v.src&&v.team==p.team)){const w=sp(p.x,p.y,8);g.globalAlpha=.55;g.strokeStyle='#2a1610';g.lineWidth=3;g.setLineDash([5,4]);g.beginPath();g.ellipse(w.x,w.y,17,9,0,0,7);g.stroke();g.setLineDash([]);txt('Ninja (unsichtbar)',w.x,w.y-22,13,'#3a2340');g.globalAlpha=1}continue}const q=sp(p.x,p.y,p.cake?112:96);
   txt((p.src?'P'+pnum(p):'Bot')+' '+cn(p)+(p.pz>0?' ☠':'')+(p.shd>0?' 🛡️':'')+(p.spd>0?' 👟':'')+(p.it?(p.it.k?' ⛏️':' 🪵'):''),q.x,q.y-12,16,'#3a2340');
@@ -907,7 +908,7 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(-DX,0,SW,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12e',W-44+DX,H-12,11,'#ffe9cf99');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12f',W-44+DX,H-12,11,'#ffe9cf99');
   txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b')+(cpMode()=='k'?' · Maus: Seite nochmal anklicken = bereit':''),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
@@ -960,7 +961,7 @@ reset();
 let cpLvl=1,cpAutoT=0,cpFT=16;
 function cpGfx(){const L=cpS.gfx=='auto'?cpLvl:CPG.indexOf(cpS.gfx)-1,w=document.querySelector('.wrap'),cw=Math.max(320,w.clientWidth||960),ch=Math.max(180,w.clientHeight||Math.round(cw*9/16));
  const nsw=Math.max(960,Math.min(1260,Math.round(H*cw/ch)));if(nsw!==SW||cv.width!==nsw){SW=nsw;DX=(SW-960)/2;cv.width=SW;cam.aspect=SW/H;cam.updateProjectionMatrix()}
- let r=Math.min(window.devicePixelRatio||1,[1,1.5,2][L]);if(cw*r>2560)r=2560/cw;R.setPixelRatio(r);R.setSize(cw,ch,false);
+ let r=Math.min(window.devicePixelRatio||1,[1,1.5,2][L]);if(cw*r>2560)r=2560/cw;R.setPixelRatio(r);R.setSize(cw,ch,false);cpNeedR=true;
  const sh=L>0;if(R.shadowMap.enabled!==sh){R.shadowMap.enabled=sh;sc.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{m.needsUpdate=true})})}
  const ms=L==2?2048:1024;if(dl.shadow.mapSize.x!==ms){dl.shadow.mapSize.set(ms,ms);if(dl.shadow.map){dl.shadow.map.dispose();dl.shadow.map=null}}}
 try{cpGfx()}catch(e){cpErr('Grafik: '+e.message)}
