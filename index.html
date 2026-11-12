@@ -898,7 +898,7 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(0,0,W,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12',W-44,H-12,11,'#ffe9cf99');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12b',W-44,H-12,11,'#ffe9cf99');
   txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b'),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
@@ -922,8 +922,8 @@ function draw(){
     txt(p.src?'Spieler '+pnum(p)+' '+(p.src=='t'?'📱':p.src[0]=='k'?'⌨️':'🎮'):'Bot',x+w/2,y+24,18,p.ready?'#fff':'#3a2340');
     txt(p.src?(p.ready?'BEREIT':'wählt…'):'frei',x+w/2,y+46,14,p.ready?'#fff':'#6a5070');
     g.globalAlpha=1}});
-  if(!players.some(p=>p.src))txt('Drücke eine Taste oder tippe auf den Bildschirm',W/2,480,24,'#fff');
-  else if(players.some(p=>p.src&&!p.pick))txt('Wähle deine Seite: Stick nach links oder rechts',W/2,478,20,'#ffe9cf');
+  if(!players.some(p=>p.src))txt(cpMode()=='t'?'Tippe auf den Bildschirm oder drücke eine Taste':'Drücke eine Taste',W/2,480,24,'#fff');
+  else if(players.some(p=>p.src&&!p.pick))txt('Wähle deine Seite: '+({p:'Stick nach links oder rechts',t:'nach links oder rechts wischen',k:'A/D bzw. Pfeiltasten links oder rechts'})[cpMode()],W/2,478,20,'#ffe9cf');
   else txt('Bereit: '+players.filter(p=>p.src&&p.ready).length+' von '+players.filter(p=>p.src).length+'. Das Spiel startet, sobald alle bereit sind. Bots füllen auf 4 gegen 4 auf.',W/2,478,18,'#ffe9cf');
   txt('Bots: '+['Leicht','Normal','Schwer'][DIFF]+' (ändern: '+cpML('rb')+')',W/2,512,19,'#fff')}
  else if(cdown>0)txt(Math.ceil(cdown-.2)>0?Math.ceil(cdown-.2)+'':'Los!',W/2,H/2+30,120,'#fff');
