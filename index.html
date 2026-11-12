@@ -189,7 +189,15 @@ addEventListener('keydown',e=>{keys[e.code]=1;if(e.code=='Space'||e.code.startsW
 addEventListener('keyup',e=>keys[e.code]=0);
 const tc={dx:0,dy:0,a:false,d:false,did:null,r:false,rid:null,c:false,cid:null,sid:null,aid:null,b:false,bid:null,l:false,lid:null,ox:0,oy:0,cx:0,cy:0};
 function pt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
-cv.addEventListener('pointerdown',e=>{e.preventDefault();join('t');const q=pt(e);{window.CZ=window.CZ||{n:0,t:0};if(q.x<70&&q.y<70){const nw=performance.now();CZ.n=nw-CZ.t<2500?CZ.n+1:1;CZ.t=nw;if(CZ.n>=5){CZ.n=0;cheatUp()}return}}
+// Maus (PC): nur Menüs bedienen, kein Touch-Spieler
+function cpMouseLobby(q){const tm=q.x<W*.45?0:q.x>W*.55?1:-1;if(tm<0)return;let p=players.find(o=>o.src&&o.src[0]=='k');if(!p){join('k1');p=players.find(o=>o.src=='k1')}if(!p)return;
+ if(p.pick&&p.team==tm){if((p.mt||0)>.5){p.ready=!p.ready;if(p.ready&&pnum(p)==1){cpS.team=p.team;cpSave()}sfx('lift')}return}
+ if(players.filter(o=>o!==p&&o.src&&o.pick&&o.team==tm).length<NP/2){p.team=tm;p.pick=true;p.ready=false;p.hopT=performance.now();sfx('pick')}}
+function cpMouseDown(q){if(paused){if(cpHelpOn)return;const n=cpItems().length;for(let i=0;i<n;i++){const L=cpLay(i);if(q.x>330&&q.x<630&&q.y>L.y&&q.y<L.y+L.h){pmi=i;pauseAct(i,cpAdj(i)?(q.x<W/2?-1:1):0);return}}return}
+ if(menu){cpMouseLobby(q);return}
+ if(over>=0){if(overT<10)overT=-1;return}
+ if(q.y<50&&Math.abs(q.x-W/2)<110){paused=true;cpSub=0;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;sfx('pick')}}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();if(e.pointerType=='mouse'){cpMouseDown(pt(e));return}join('t');const q=pt(e);{window.CZ=window.CZ||{n:0,t:0};if(q.x<70&&q.y<70){const nw=performance.now();CZ.n=nw-CZ.t<2500?CZ.n+1:1;CZ.t=nw;if(CZ.n>=5){CZ.n=0;cheatUp()}return}}
  if(cpMode()=='t'&&Math.hypot(q.x-685,q.y-28)<26){cpMute();sfx('pick');return}
  if(cpMode()=="t"&&!menu&&over<0&&Math.hypot(q.x-685,q.y-72)<26){paused=!paused;cpSub=0;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;sfx("pick");return}
  if(paused){const n=cpItems().length;for(let i=0;i<n;i++){const L=cpLay(i);if(q.x>330&&q.x<630&&q.y>L.y&&q.y<L.y+L.h){pmi=i;pauseAct(i,cpAdj(i)?(q.x<W/2?-1:1):0);return}}}
@@ -898,8 +906,8 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(0,0,W,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12b',W-44,H-12,11,'#ffe9cf99');
-  txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b'),W/2,96,16,'#ffe9cf');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-12c',W-44,H-12,11,'#ffe9cf99');
+  txt('Links = Rot, rechts = Blau. Bereit: '+cpML('a')+' · zurück: '+cpML('b')+(cpMode()=='k'?' · Maus: Seite nochmal anklicken = bereit':''),W/2,96,16,'#ffe9cf');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
   txt('◀   wählen   ▶',W/2,154,16,'#ffe9cf');
@@ -923,7 +931,7 @@ function draw(){
     txt(p.src?(p.ready?'BEREIT':'wählt…'):'frei',x+w/2,y+46,14,p.ready?'#fff':'#6a5070');
     g.globalAlpha=1}});
   if(!players.some(p=>p.src))txt(cpMode()=='t'?'Tippe auf den Bildschirm oder drücke eine Taste':'Drücke eine Taste',W/2,480,24,'#fff');
-  else if(players.some(p=>p.src&&!p.pick))txt('Wähle deine Seite: '+({p:'Stick nach links oder rechts',t:'nach links oder rechts wischen',k:'A/D bzw. Pfeiltasten links oder rechts'})[cpMode()],W/2,478,20,'#ffe9cf');
+  else if(players.some(p=>p.src&&!p.pick))txt('Wähle deine Seite: '+({p:'Stick nach links oder rechts',t:'nach links oder rechts wischen',k:'A/D, Pfeiltasten oder Maus (Seite anklicken)'})[cpMode()],W/2,478,20,'#ffe9cf');
   else txt('Bereit: '+players.filter(p=>p.src&&p.ready).length+' von '+players.filter(p=>p.src).length+'. Das Spiel startet, sobald alle bereit sind. Bots füllen auf 4 gegen 4 auf.',W/2,478,18,'#ffe9cf');
   txt('Bots: '+['Leicht','Normal','Schwer'][DIFF]+' (ändern: '+cpML('rb')+')',W/2,512,19,'#fff')}
  else if(cdown>0)txt(Math.ceil(cdown-.2)>0?Math.ceil(cdown-.2)+'':'Los!',W/2,H/2+30,120,'#fff');
