@@ -48,6 +48,7 @@ const TX={
  einst:'Einstellungen',pause:'Pause',gewinnt:t=>'Team '+t+' gewinnt!',naechste:'Angriff drücken für die nächste Runde',
  weiter:'Weiter',anl:'Anleitung',zumMenue:'Zurück zum Menü',zurueck:'Zurück',
  ton:m=>'Ton: '+(m?'aus':'an'),musik:v=>'Musik: ◀ '+v+' % ▶',sfx:v=>'Soundeffekte: ◀ '+v+' % ▶',vib:v=>'Vibration: '+(v?'an':'aus'),blut:v=>'Blut: ◀ '+v+' ▶',grafik:v=>'Grafik: ◀ '+v+' ▶',auto:l=>'Auto ('+l+')',
+ bln:['aus','wenig','brutal'],gfxN:['Niedrig','Mittel','Hoch'],fehler:(m,l)=>'Fehler: '+m+(l?' (Zeile '+l+')':''),grafikFehler:m=>'Grafik: '+m,helpClose:'Schließen',helpEnter:'Enter / Rücktaste',helpX:'„Schließen“',helpScroll:'Blättern',helpStick:'Stick',helpArrows:'Pfeiltasten',helpKb:'Tastatur',helpTouch:'Touch',helpSteuerung:'Steuerung',creditsTitel:'Credits',
  pauseHint:'{a} Wählen · {b} Weiterspielen',einstHint:'{a} OK · {b} Zurück',
  helpRows:['Laufen','Angreifen (halten = aufladen)','Ablegen · Hut · Essen (halten)','Ausweichrolle','Klasse wechseln · Spezial','Blocken','Anvisieren (halten)','Ziel wechseln','Pause'],
  helpL:[['Ziel und Turm','Rette deine Prinzessin aus dem Gegner-Kerker auf deinen Thron und füttere die gegnerische mit Kuchen (dick = langsamer Träger). Turm in der Mitte: zusammen schneller eingenommen, das haltende Team heilt sich dort.'],['Kuchen','Wachsen an hellen Tellern nach. {b} halten = essen (heilt 3 Leben), kurz tippen = ablegen. Die Prinzessin verliert alle 14 s einen Kuchen.']],
@@ -55,8 +56,8 @@ const TX={
  credits:'Schrift: Baloo 2 (Ek Type, SIL Open Font License, Google Fonts)<br>3D: three.js (MIT-Lizenz)<br>Musik und Soundeffekte: im Spiel selbst erzeugt'};
 function tx(k,...a){const v=TX[k];return typeof v=='function'?v(...a):v==null?k:v}
 function cpErr(s){const n=performance.now();if(n-cpErrT<1500)return;cpErrT=n;cpErrEl.textContent=s;cpErrEl.style.display='block';clearTimeout(cpErr.h);cpErr.h=setTimeout(()=>{cpErrEl.style.display='none'},8000)}
-window.onerror=(m,s,l)=>{cpErr('Fehler: '+m+(l?' (Zeile '+l+')':''))};
-addEventListener('unhandledrejection',e=>{const r=e.reason;cpErr('Fehler: '+((r&&r.message)||r)+cpLine(r))});
+window.onerror=(m,s,l)=>{cpErr(tx('fehler',m,l))};
+addEventListener('unhandledrejection',e=>{const r=e.reason;cpErr(tx('fehler',(r&&r.message)||r)+cpLine(r))});
 // Einstellungen: robust lesen, fehlende/kaputte Werte durch Standard ersetzen
 function cpLoad(){let o=null;try{o=JSON.parse(localStorage.getItem('cpSet')||'null')}catch(e){}if(!o||typeof o!='object'||Array.isArray(o))o={};
  const v01=x=>(typeof x=='number'&&x>=0&&x<=1)?Math.round(x*10)/10:null,ov=v01(o.vol);
@@ -86,7 +87,7 @@ function fixG(G,amt){if(G.hp<=0){if(RES[G.t].w<3)return;RES[G.t].w-=3;sfx('pick'
 function gateHit(p,rng,dmg){for(const G of GATE){if(G.t==p.team||G.hp<=0)continue;const r=G.r,gx=Math.max(r[0],Math.min(r[1],p.x))-p.x,gy=Math.max(r[2],Math.min(r[3],p.y))-p.y;if(Math.hypot(gx,gy)<rng){G.hp-=dmg;sfx('hit');gchip(G,p.x,p.y,G.hp<=0);if(G.hp<=0){G.down=30;sfx('die')}}}}
 let zoomK=0,MSG=null,pmi=0,splats=[],BLOOD=2;const pnp={u:1,d:1,a:1};
 try{const v=localStorage.getItem('cpBlood2');BLOOD=v==null?(localStorage.getItem('cpBlood')=='0'?0:2):v=='0'?0:v=='1'?1:2}catch(e){}
-const BLN=['aus','wenig','brutal'];function setBlood(v){BLOOD=((v|0)%3+3)%3;try{localStorage.setItem('cpBlood2',''+BLOOD)}catch(e){}const b=document.getElementById('bl');if(b)b.textContent='Blut: '+BLN[BLOOD]}
+const BLN=TX.bln;function setBlood(v){BLOOD=((v|0)%3+3)%3;try{localStorage.setItem('cpBlood2',''+BLOOD)}catch(e){}const b=document.getElementById('bl');if(b)b.textContent='Blut: '+BLN[BLOOD]}
 setBlood(BLOOD);document.getElementById('bl').onclick=()=>setBlood(BLOOD+1);
 function addSplat(x,y,r){if(splats.length>=60)splats.shift();splats.push({x,y,r,e:.6+Math.random()*.4,a:Math.random()*6.28,t:(BLOOD>1?26:14)+Math.random()*(BLOOD>1?10:6)})}
 function bloodFx(q,dmg,ux,uy,big){if(!BLOOD)return;const X=BLOOD>1,n=Math.round((3+dmg*3)*(X?2.5:1))+(big?(X?36:12):0),b=Math.atan2(uy,ux),rd=!(ux||uy);
@@ -108,7 +109,7 @@ function magicUse(p){if((p.mp||0)<1||p.cls<6||p.carry||p.stun>0)return;const T=p
   p.mp=0;p.cd=.8;p.sw=.3;b.shd=0;b.blk=false;const d=Math.hypot(b.x-p.x,b.y-p.y)||1;hurt(b,99,(b.x-p.x)/d,(b.y-p.y)/d,0,0,p.i);p.hp=Math.min(CLS[8].hp,p.hp+5);sfx('feed');shake=Math.max(shake,12);hitStop=.1;pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:90,col:0x6be36b});fx(p.x,p.y,40,14,0,120,120,300,.5,1.8)}}
 function blockFx(q){q.bw=.35;const x=q.x+q.fx*18,y=q.y+q.fy*18;fx(x,y,30,10,0,190,110,500,.35,1.6);fx(x,y,30,8,3,230,100,500,.3,1.3);pulses.push({x,y,life:.2,max:.2,r:34,col:0xffe066});sfx('pick');rumble(q,80,.3,.4);shake=Math.max(shake,3)}
 // Pause-Menü: Hauptliste (cpSub=0) und Einstellungen (cpSub=1)
-let cpSub=0;const CPG=['auto','low','mid','high'],CPGN=['Niedrig','Mittel','Hoch'];
+let cpSub=0;const CPG=['auto','low','mid','high'],CPGN=TX.gfxN;
 function cpItems(){return cpSub?[tx('ton',cpS.mute),tx('musik',Math.round(cpS.mv*100)),tx('sfx',Math.round(cpS.sv*100)),tx('vib',cpS.vib),tx('blut',BLN[BLOOD]),tx('grafik',cpS.gfx=='auto'?tx('auto',CPGN[cpLvl]):CPGN[CPG.indexOf(cpS.gfx)-1]),tx('zurueck')]:[tx('weiter'),tx('einst'),tx('anl'),tx('zumMenue')]}
 function cpLay(i){return cpSub?{y:105+i*50,h:44}:{y:190+i*52,h:46}}
 function cpAdj(i){return cpSub&&(i==1||i==2||i==4||i==5)}
@@ -260,18 +261,18 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-23e';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-23f';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
  const RL=TX.helpRows,R=[[RL[0],['Stick / Steuerkreuz','WASD (P2: Pfeiltasten)','links wischen']],[RL[1],[B('a')+' '+B('x'),'Leertaste (P2: Enter)','⚔️']],[RL[2],[B('b'),'E (P2: Shift rechts)','⬇️']],[RL[3],[B('rb')+' '+B('rt'),'Shift links (P2: /)','💨']],[RL[4],[B('y'),'Q (P2: .)','🔁']],[RL[5],[B('lt'),'F (P2: ,)','🛡️']],[RL[6],[B('lb'),'R (P2: ;)','🎯']],[RL[7],[B('lb')+' + rechter Stick','Z / X (P2: [ / ])','–']],[RL[8],[B('start'),'P','⏸️ oben rechts']]];
- const FT='Schließen: '+(m=='p'?B('b')+' / '+B('a'):m=='k'?'Enter / Rücktaste':'„Schließen“')+(m=='t'?'':' · Blättern: '+(m=='p'?'Stick':'Pfeiltasten'));
- const hd=['Controller ('+(cpPadT=='ps'?'PlayStation':'Xbox')+')','Tastatur','Touch'][c],cl=m=='p'?B('b')+' / '+B('a'):m=='k'?'Enter / Rücktaste':'„Schließen“';
+ const FT=tx('helpClose')+': '+(m=='p'?B('b')+' / '+B('a'):m=='k'?TX.helpEnter:TX.helpX)+(m=='t'?'':' · '+tx('helpScroll')+': '+(m=='p'?TX.helpStick:TX.helpArrows));
+ const hd=['Controller ('+(cpPadT=='ps'?'PlayStation':'Xbox')+')',TX.helpKb,TX.helpTouch][c],cl='';
  const T=s=>s.replace(/\{(\w+)\}/g,(x,k)=>B(k));
  const CL=TX.helpL,CR=TX.helpR,CD=a=>'<div class="hc"><h4>'+a[0]+'</h4>'+T(a[1])+'</div>';
- document.getElementById('helpIn').innerHTML='<h3>Anleitung <span class="hf">'+FT+'</span></h3><div class="hg"><div class="hcs"><div class="hc"><h4>Steuerung – '+hd+'</h4><table>'+R.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1][c]+'</td></tr>').join('')+'</table></div>'+CL.map(CD).join('')+'</div><div class="hcs">'+CR.map(CD).join('')+'</div></div>';
+ document.getElementById('helpIn').innerHTML='<h3>'+tx('anl')+' <span class="hf">'+FT+'</span></h3><div class="hg"><div class="hcs"><div class="hc"><h4>'+tx('helpSteuerung')+' – '+hd+'</h4><table>'+R.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1][c]+'</td></tr>').join('')+'</table></div>'+CL.map(CD).join('')+'</div><div class="hcs">'+CR.map(CD).join('')+'</div></div>';
  if(cpHelpEl.style.display!='block'){cpHelpEl.style.display='block';cpHelpEl.scrollTop=0}}
-function cpCredits(){cpHelpOn=true;cpCred=true;document.getElementById('helpIn').innerHTML='<h3>Credits</h3><div class="hc"><h4>'+tx('titel')+' '+CPVER+'</h4>'+TX.credits+'</div>';cpHelpEl.style.display='block';cpHelpEl.scrollTop=0}
+function cpCredits(){cpHelpOn=true;cpCred=true;document.getElementById('helpIn').innerHTML='<h3>'+tx('creditsTitel')+'</h3><div class="hc"><h4>'+tx('titel')+' '+CPVER+'</h4>'+TX.credits+'</div>';cpHelpEl.style.display='block';cpHelpEl.scrollTop=0}
 document.getElementById('helpX').onclick=()=>{cpHelpShow(false);sfx('pick')};
 // Handy-Grundlagen: Vollbild, Zurück-Taste, Wake Lock, Pause beim Verlassen, Fokus
 let cpFoc=true,cpHist=false,cpWL=null;
@@ -1016,7 +1017,7 @@ function cpGfx(){const L=cpS.gfx=='auto'?cpLvl:CPG.indexOf(cpS.gfx)-1,w=document
  let r=Math.min(window.devicePixelRatio||1,[1,1.5,2][L]);if(cw*r>2560)r=2560/cw;R.setPixelRatio(r);R.setSize(cw,ch,false);cpNeedR=true;
  const sh=L>0;if(R.shadowMap.enabled!==sh){R.shadowMap.enabled=sh;sc.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{m.needsUpdate=true})})}
  const ms=L==2?2048:1024;if(dl.shadow.mapSize.x!==ms){dl.shadow.mapSize.set(ms,ms);if(dl.shadow.map){dl.shadow.map.dispose();dl.shadow.map=null}}}
-try{cpGfx()}catch(e){cpErr('Grafik: '+e.message)}
+try{cpGfx()}catch(e){cpErr(tx('grafikFehler',e.message))}
 let cpRsT=0;addEventListener('resize',()=>{clearTimeout(cpRsT);cpRsT=setTimeout(()=>{try{cpGfx()}catch(e){}},200)});
 if('serviceWorker'in navigator&&location.protocol!=='file:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
 let last=performance.now();
@@ -1029,7 +1030,7 @@ let last=performance.now();
   if(!Number.isFinite(camX+camZ+camH)){camX=camZ=0;camH=520}}catch(e){cv.err=e}
  try{step(dt)}catch(e){cv.err=e}
  try{draw()}catch(e){cv.err=e}
- if(cv.err){g.font='14px monospace';g.textAlign='left';g.fillStyle='#fff';g.fillRect(0,H-26,W,26);g.fillStyle='#c00';g.fillText('Fehler: '+cv.err.message+cpLine(cv.err),8,H-8)}
+ if(cv.err){g.font='14px monospace';g.textAlign='left';g.fillStyle='#fff';g.fillRect(0,H-26,W,26);g.fillStyle='#c00';g.fillText(tx('fehler',cv.err.message)+cpLine(cv.err),8,H-8)}
  requestAnimationFrame(loop)})(last);
 </script>
 
