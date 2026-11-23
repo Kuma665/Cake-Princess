@@ -118,7 +118,7 @@ function cpAdj(i){return cpSub&&(i==1||i==2||i==4||i==5)}
 function cpMute(){cpS.mute=!cpS.mute;cpVolApply();cpSave()}
 function cpFSToggle(){const d=document;if(d.fullscreenElement||d.webkitFullscreenElement){try{(d.exitFullscreen||d.webkitExitFullscreen).call(d)}catch(e){}}else cpFS()}
 function cpTopBtn(q){if(!(menu||paused)||cpHelpOn)return false;const x=W+DX-34;if(Math.hypot(q.x-x,q.y-120)<28){cpFSToggle();return true}if(Math.hypot(q.x-(x-48),q.y-120)<28){cpMute();return true}return false}
-addEventListener('keydown',e=>{if(e.code=='KeyM'&&!e.repeat){cpMute()}});
+addEventListener('keydown',e=>{if(e.code=='KeyM'&&!e.repeat&&(menu||paused))cpMute()});
 function pauseAct(i,dir){dir=dir||0;
  if(!cpSub){if(i==2)cpHelpShow(true);else if(i==1){cpSub=1;pmi=0}else{paused=false;if(i==3)reset()}sfx('pick');return}
  if(i==0)cpMute();
@@ -264,7 +264,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-23i';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-23j';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -423,7 +423,7 @@ function botInput(p){
  return{dx:kd.dx,dy:kd.dy,a,d:!!tp||!!(p.cake&&!p.carry&&p.hp<CLS[p.cls].hp*.6&&(!near||nd>220)),ro,bl,lk}
 }
 function step(dt){
- {window.L3s=window.L3s||{};for(const gp of pads()){const on=!!(gp.buttons[10]&&gp.buttons[10].pressed);if(on&&!L3s[gp.index]){const pl=players.find(q=>q.src=='p'+gp.index);cheatUp(pl?pl.team:null)}L3s[gp.index]=on}}
+ {window.L3s=window.L3s||{};for(const gp of pads()){const on=!!(gp.buttons[10]&&gp.buttons[10].pressed);if(on&&!L3s[gp.index]){if(menu||paused){cpMute();sfx('pick')}else{const pl=players.find(q=>q.src=='p'+gp.index);cheatUp(pl?pl.team:null)}}L3s[gp.index]=on;const r3=!!(gp.buttons[11]&&gp.buttons[11].pressed);if(r3&&!L3s['r'+gp.index]&&(menu||paused)){cpFSToggle();sfx('pick')}L3s['r'+gp.index]=r3}}
  const stb=pads().some(gp=>gp.buttons[9]&&gp.buttons[9].pressed)||keys.KeyP;
  if(stb&&!pz){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1}pz=!!stb;if(paused){pauseNav(dt);return}
  if(paused)return;
