@@ -89,6 +89,8 @@ function cpItems(){return cpSub?['Ton: '+(cpS.mute?'aus':'an'),'Musik: ◀ '+Mat
 function cpLay(i){return cpSub?{y:105+i*50,h:44}:{y:190+i*52,h:46}}
 function cpAdj(i){return cpSub&&(i==1||i==2||i==4||i==5)}
 function cpMute(){cpS.mute=!cpS.mute;cpVolApply();cpSave()}
+function cpMuteHit(q){return(menu||paused)&&!cpHelpOn&&Math.hypot(q.x-(W+DX-34),q.y-120)<28}
+addEventListener('keydown',e=>{if(e.code=='KeyM'&&!e.repeat){cpMute()}});
 function pauseAct(i,dir){dir=dir||0;
  if(!cpSub){if(i==2)cpHelpShow(true);else if(i==1){cpSub=1;pmi=0}else{paused=false;if(i==3)reset()}sfx('pick');return}
  if(i==0)cpMute();
@@ -194,12 +196,12 @@ function pt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.
 function cpMouseLobby(q){const tm=q.x<W*.45?0:q.x>W*.55?1:-1;if(tm<0)return;let p=players.find(o=>o.src&&o.src[0]=='k');if(!p){join('k1');p=players.find(o=>o.src=='k1')}if(!p)return;
  if(p.pick&&p.team==tm){if((p.mt||0)>.5){p.ready=!p.ready;if(p.ready&&pnum(p)==1){cpS.team=p.team;cpSave()}sfx('lift')}return}
  if(players.filter(o=>o!==p&&o.src&&o.pick&&o.team==tm).length<NP/2){p.team=tm;p.pick=true;p.ready=false;p.hopT=performance.now();sfx('pick')}}
-function cpMouseDown(q){if(paused){if(cpHelpOn)return;const n=cpItems().length;for(let i=0;i<n;i++){const L=cpLay(i);if(q.x>330&&q.x<630&&q.y>L.y&&q.y<L.y+L.h){pmi=i;pauseAct(i,cpAdj(i)?(q.x<W/2?-1:1):0);return}}return}
+function cpMouseDown(q){if(cpMuteHit(q)){cpMute();sfx('pick');return}if(paused){if(cpHelpOn)return;const n=cpItems().length;for(let i=0;i<n;i++){const L=cpLay(i);if(q.x>330&&q.x<630&&q.y>L.y&&q.y<L.y+L.h){pmi=i;pauseAct(i,cpAdj(i)?(q.x<W/2?-1:1):0);return}}return}
  if(menu){cpMouseLobby(q);return}
  if(over>=0){if(overT<10)overT=-1;return}
  if(q.y<50&&Math.abs(q.x-W/2)<110){paused=true;cpSub=0;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;sfx('pick')}}
 cv.addEventListener('pointerdown',e=>{e.preventDefault();if(e.pointerType=='mouse'){cpMouseDown(pt(e));return}join('t');const q=pt(e);{window.CZ=window.CZ||{n:0,t:0};if(q.x+DX<70&&q.y<70){const nw=performance.now();CZ.n=nw-CZ.t<2500?CZ.n+1:1;CZ.t=nw;if(CZ.n>=5){CZ.n=0;cheatUp()}return}}
- if(cpMode()=='t'&&Math.hypot(q.x-685,q.y-28)<26){cpMute();sfx('pick');return}
+ if(cpMuteHit(q)){cpMute();sfx('pick');return}
  if(cpMode()=="t"&&!menu&&over<0&&Math.hypot(q.x-685,q.y-72)<26){paused=!paused;cpSub=0;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;sfx("pick");return}
  if(paused){const n=cpItems().length;for(let i=0;i<n;i++){const L=cpLay(i);if(q.x>330&&q.x<630&&q.y>L.y&&q.y<L.y+L.h){pmi=i;pauseAct(i,cpAdj(i)?(q.x<W/2?-1:1):0);return}}}
  if(q.y<50&&Math.abs(q.x-W/2)<110){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1;return}
@@ -388,6 +390,7 @@ function botInput(p){
 }
 function step(dt){
  {window.L3s=window.L3s||{};for(const gp of pads()){const on=!!(gp.buttons[10]&&gp.buttons[10].pressed);if(on&&!L3s[gp.index]){const pl=players.find(q=>q.src=='p'+gp.index);cheatUp(pl?pl.team:null)}L3s[gp.index]=on}}
+ {window.TRs=window.TRs||{};for(const gp of pads()){const on=!!(gp.buttons[3]&&gp.buttons[3].pressed);if(on&&!TRs[gp.index]&&(menu||paused)&&!cpHelpOn){cpMute();sfx('pick')}TRs[gp.index]=on}}
  const stb=pads().some(gp=>gp.buttons[9]&&gp.buttons[9].pressed)||keys.KeyP;
  if(stb&&!pz){paused=!paused;pmi=0;pnp.u=pnp.d=pnp.a=pnp.b=1}pz=!!stb;if(paused){pauseNav(dt);return}
  if(paused)return;
@@ -927,7 +930,7 @@ function draw(){
  if(!menu&&cdown<=0&&players.some(p=>p.src&&p.cls==5))txt('Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',W/2,H-18,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(-DX,0,SW,H);
   const now=performance.now();
-  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-23-r187',14-DX,H-12,11,'#ffe9cf99','left');
+  txtO('Cake Princess',W/2,62,52,'#fff');txt('v2026-11-23b',14-DX,H-12,11,'#ffe9cf99','left');
   for(const t of [0,1]){const px=t?560:40;g.globalAlpha=.55;g.fillStyle=COL[t];hrr(px,116,360,330,22);g.fill();g.globalAlpha=1;g.lineWidth=4;g.strokeStyle='#2a1610';hrr(px,116,360,330,22);g.stroke();
    txtO(t?'Blau ▶':'◀ Rot',px+180,154,30,'#fff')}
   const used=[new Set(),new Set()];
@@ -960,10 +963,11 @@ function draw(){
   const sx=tc.sid!==null?tc.ox:110-DX,sy=tc.sid!==null?tc.oy:420;
   g.globalAlpha=.45;circ(sx,sy,55,'#fff');circ(tc.sid!==null?tc.cx:sx,tc.sid!==null?tc.cy:sy,26,'#3a2340');
   circ(DX+850,420,56,tc.a?'#fff':'#3a2340');circ(DX+730,460,40,tc.d?'#fff':'#3a2340');circ(DX+860,310,40,tc.r?'#fff':'#3a2340');circ(DX+740,345,36,tc.c?'#fff':'#3a2340');circ(DX+620,440,36,tc.b?'#fff':'#3a2340');circ(DX+620,350,36,tc.l?'#fff':'#3a2340');g.globalAlpha=1;g.font='30px serif';g.fillText('💨',DX+860,321);g.fillText('🔁',DX+740,356);g.fillText('🛡️',DX+620,451);g.fillText('🎯',DX+620,361);g.fillText('⬇️',DX+730,471);g.font='44px serif';g.textAlign='center';g.fillText('⚔️',DX+850,435)}
- if(cpMode()=='t'){g.globalAlpha=.55;circ(685,28,17,'#3a2340');g.globalAlpha=1;g.font='18px serif';g.textAlign='center';g.fillText(cpS.mute?'🔇':'🔊',685,35);if(!menu&&over<0){g.globalAlpha=.55;circ(685,72,17,"#3a2340");g.globalAlpha=1;g.fillText(paused?"▶️":"⏸️",685,79)}}
+ if(cpMode()=='t'&&!menu&&over<0){g.globalAlpha=.55;circ(685,72,17,"#3a2340");g.globalAlpha=1;g.font='18px serif';g.textAlign='center';g.fillText(paused?"▶️":"⏸️",685,79)}
  if(paused){g.fillStyle='#0008';g.fillRect(-DX,0,SW,H);if(cpSub)txtO('Einstellungen',W/2,85,48,'#fff');else txtO('Pause',W/2,165,64,'#fff');
   cpItems().forEach((s,i)=>{const L=cpLay(i),y=L.y,on=pmi==i;hrr(330,y,300,L.h,L.h/2);g.fillStyle=on?'#ffd23f':'#fff3e2';g.fill();g.lineWidth=on?6:3;g.strokeStyle='#2a1610';g.stroke();txt((on&&!cpAdj(i)?'▶ ':'')+s,W/2,y+L.h*.68,cpSub?21:23,'#3a2340')});
   if(!cpHelpOn)cpCorner(cpSub?'{a} OK · {b} Zurück':'{a} Wählen · {b} Weiterspielen')}
+ if((menu||paused)&&!cpHelpOn){const mx=W+DX-34;g.globalAlpha=.7;circ(mx,120,20,'#3a2340');g.globalAlpha=1;g.font='22px serif';g.textAlign='center';g.fillText(cpS.mute?'🔇':'🔊',mx,128)}
  if(MSG&&MSG.t>0&&!menu&&!paused){g.globalAlpha=Math.min(1,MSG.t*2);txtO(MSG.s,W/2,H/2-70,38,'#fff');g.globalAlpha=1}
  if(over>=0){g.fillStyle='#000c';g.fillRect(-DX,0,SW,H);
   txt('Team '+NAME[over]+' gewinnt!',W/2,90,60,'#fff');
