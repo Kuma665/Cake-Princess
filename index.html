@@ -170,6 +170,8 @@ function upgradeHit(p,w,rg){const T=p.team;for(const b of BLD){if(b.t!=T||b.k>4|
  if(b.up>=UPN){RES[T].w-=6;RES[T].e-=3;UPG[T][b.k]=1;b.up=0;sfx('pick');shake=Math.max(shake,8);pulses.push({x:b.x,y:b.y,life:.6,max:.6,r:90,col:0xffd23f});KF.push({t:3,s:NAME[T]+': '+UN[b.k]+' freigeschaltet!'})}
  return true}return false}
 function spread(p,a,sp){const c0=Math.cos(a),s0=Math.sin(a);return{vx:(p.fx*c0-p.fy*s0)*sp,vy:(p.fx*s0+p.fy*c0)*sp}}
+// Zielhilfe (nur Menschen, nicht beim Anvisieren): steht ein Gegner ungefähr in Blickrichtung (cos>cs) und in Reichweite rg, dreht sich die Figur vor dem Angriff zu ihm
+function cpAim(p,rg,cs){if(!p.src||p.lt)return;let b=null,bs=-9;for(const q of players){if(q.team==p.team||q.dead>0||q.inv>0)continue;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy);if(d>rg||d<1)continue;const c=(dx*p.fx+dy*p.fy)/d;if(c<cs)continue;const s=c-d/rg*.35;if(s>bs){bs=s;b=q}}if(b){const d=Math.hypot(b.x-p.x,b.y-p.y);p.fx=(b.x-p.x)/d;p.fy=(b.y-p.y)/d}}
 function cheatUp(only){if(menu)return;const ts=new Set(only!=null?[only]:players.filter(p=>p.src).map(p=>p.team));if(!ts.size)ts.add(0);for(const T of ts){UPG[T]=[1,1,1,1,1];for(const b of BLD)if(b.t==T)b.up=0;KF.push({t:3,s:NAME[T]+': alle Gebäude verbessert!'})}sfx('pick')}
 function gather(p,w,rg){w=w||1;rg=rg||44;if(p.it)return;const nr=(o,rg)=>{const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);return d<o.r+rg&&(dx*p.fx+dy*p.fy)>.2*d};
  for(const o of OBS)if(o.hw>0&&nr(o,rg)){o.dm=(o.dm||0)+w;o.shk=w>1?.5:.3;sfx('hit');fx(o.x,o.y,70,w>1?9:5,1,120,100,500,.5,1.2);if(o.dm>=4&&loot.length<30){o.dm=0;o.hw--;if(o.hw<=0)o.hr=10;spawnLoot(0,o,p);sfx('pick')}else if(o.dm>=4)o.dm=3;return}
@@ -363,7 +365,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25h';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25i';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -567,7 +569,7 @@ function step(dt){
   p.rp=!!inp.ro;p.dash-=dt;p.dcd-=dt;p.blk=!!inp.bl&&p.cls==0&&!p.up&&!p.carry&&!p.it&&p.dash<=0&&!(p.lng>0)&&p.stun<=0;if(p.blk)inp.a=false;
   
   p.cp=!!inp.cl;
-  if(inp.cl&&!p.cq&&p.zh&&!p.bc&&!p.tf&&(p.zw>0||p.zc>=1)){if(p.zw>0){p.zs=ZF[(ZF.indexOf(p.zs)+1)%3];fx(p.x,p.y,40,8,3,120,90)}else{p.zw=ZW;p.zs=ZF[0];p.zc=0}sfx('lift');rumble(p,50,.2,.3)}else if(inp.cl&&!p.cq&&p.cls<5&&!p.carry&&p.dash<=0&&(p.up||UPG[p.team][p.cls]||p.upk)){p.up=p.up?0:1;p.ch=0;p.cx=true;sfx('lift');pulses.push({x:p.x,y:p.y,life:.4,max:.4,r:55,col:p.up?0xffd23f:0xdfe8f2});fx(p.x,p.y,40,10,p.up?0:3,120,100)}if(p.cls>=6&&!(p.zw>0)&&((inp.cl&&!p.cq)||(inp.bl&&!p.bq)))magicUse(p);p.bq=!!inp.bl;p.cq=!!inp.cl;
+  if(inp.cl&&!p.cq&&p.zh&&!p.bc&&!p.tf&&(p.zw>0||p.zc>=1)){if(p.zw>0){p.zs=ZF[(ZF.indexOf(p.zs)+1)%3];fx(p.x,p.y,40,8,3,120,90)}else{p.zw=ZW;p.zs=ZF[0];p.zc=0}sfx('lift');rumble(p,50,.2,.3)}else if(inp.cl&&!p.cq&&p.cls<5&&!p.carry&&p.dash<=0&&(p.up||UPG[p.team][p.cls]||p.upk)){p.up=p.up?0:1;p.ch=0;p.cx=true;sfx('lift');pulses.push({x:p.x,y:p.y,life:.4,max:.4,r:55,col:p.up?0xffd23f:0xdfe8f2});fx(p.x,p.y,40,10,p.up?0:3,120,100)}if(p.cls>=6&&!(p.zw>0)&&((inp.cl&&!p.cq)||(inp.bl&&!p.bq))){cpAim(p,p.cls==6?450:120,p.cls==6?.82:.6);magicUse(p)}p.bq=!!inp.bl;p.cq=!!inp.cl;
   const m=Math.hypot(inp.dx,inp.dy);
   let sp=CLS[p.cls].sp*(p.spd>0?1.45:1);if(p.ch>.25)sp*=.6;if(p.blk)sp*=.55;
   if(p.carry){let hn=0;for(const q of players)if(q!==p&&q.team==p.team&&q.dead<=0&&!q.carry&&Math.hypot(q.x-p.x,q.y-p.y)<110)hn++;p.carry.hn=hn;sp*=Math.max(.15,1-.17*p.carry.f/(1+.9*hn))}
@@ -587,7 +589,7 @@ function step(dt){
   const rel=p.prev&&!inp.a&&!p.cx&&!p.carry&&p.dash<=0,big=rel&&p.ch>=.8,tap=rel&&!big,och=p.ch;
   if(inp.a&&!p.carry&&!p.cx&&p.dash<=0&&!(p.gst>0))p.ch=Math.min(1.4,p.ch+dt);else p.ch=0;
   if(!inp.a)p.cx=false;if(p.ch>.25&&p.ch<.8)rumble(p,120,0,.1+.3*(p.ch-.25)/.55);if(och<.8&&p.ch>=.8){sfx('pick');rumble(p,130,.8,.8)}
-  if(tap&&p.cd<=0&&p.cls==0){
+  if(tap&&p.cd<=0&&p.cls==0){cpAim(p,110,.6);
    p.combo=p.ct>0?(p.combo%3)+1:1;p.ct=.7;p.fin=p.combo==3;p.cd=p.fin?.8:.42;if(!p.src&&p.fin)p.cd=[2.2,1.6,1.1][DIFF];p.sw=p.fin?.25:.15;p.x+=p.fx*8;p.y+=p.fy*8;sfx(p.fin?'hit':'swing');
    for(const G of GATE){if(G.t==p.team||G.hp<=0)continue;const r=G.r,gx=Math.max(r[0],Math.min(r[1],p.x))-p.x,gy=Math.max(r[2],Math.min(r[3],p.y))-p.y,gd=Math.hypot(gx,gy);
     if(gd<48&&(gx*p.fx+gy*p.fy)>=-.1*gd){G.hp--;sfx('hit');gchip(G,p.x,p.y,G.hp<=0);if(G.hp<=0){G.down=30;sfx('die')}}}
@@ -601,7 +603,7 @@ function step(dt){
      if(q.hp<=0){q.dead=3;sfx('die');if(q.carry){q.carry.by=null;q.carry=null}q.cake=false;bloodFx(q,3,dx/(d||1),dy/(d||1),1)}
     }}
   }
-  if(p.cls>0&&tap&&p.cd<=0)useSkill(p);if(big&&p.cd<=0)chargeAtk(p);
+  {const c=p.cls,u=p.up;if(p.cls>0&&tap&&p.cd<=0){const f=c==1||c==2||(c==3&&u)||(c==4&&u);cpAim(p,f?420:110,f?.82:.6);useSkill(p)}if(big&&p.cd<=0){const f=c==1||c==2||c==6||c==7||(c==4&&u);cpAim(p,f?450:120,f?.82:.6);chargeAtk(p)}}
   p.prev=inp.a;
   if(inp.d&&!p.dp&&p.carry){const c=p.carry;c.by=null;c.x=p.x;c.y=p.y;p.carry=null;p.nl=1.2;sfx('lift')}
   if(inp.d&&!p.dp&&p.it&&!p.carry&&!p.cake){const l=p.it;l.by=null;l.x=p.x+p.fx*28;l.y=p.y+p.fy*28;l.z=0;l.vz=0;p.it=null;p.ln=.8;sfx('lift')}
