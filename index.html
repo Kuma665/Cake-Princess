@@ -39,7 +39,7 @@ function cpLine(e){const m=((e&&e.stack)||'').match(/:(\d+):\d+\)?\s*(\n|$)/);re
 // Alle sichtbaren Texte (Deutsch) an einer Stelle, für spätere Übersetzung. Werte mit {a} {b} {y} … sind Tastenplatzhalter, Funktionen bekommen Werte.
 const TX={
  titel:'Cake Princess',spezBereit:'Spezial bereit!',hilfe:'Hilfe!',ninjaUnsicht:'Ninja (unsichtbar)',spezial:'Spezial: {y}',ablegen:'{b}: ablegen',essen:'Ablegen halten: essen',bau:'Bau: 3 Holz',prinzessin:'Prinzessin',aufheben:'{b}: aufheben',thron:'Thron',kerker:'Kerker ▼',zauberhut:'Zauberhut',
- verbessern:'Draufschlagen: verbessern (6 Holz, 3 Erz)',hutTipp:'Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',warpTipp:"Teleporter! Bringt dich zwischen Burg und Brücke hin und her.",warpPrin:"Mit der Prinzessin geht kein Teleporter!",
+ verbessern:'Draufschlagen: verbessern (6 Holz, 3 Erz)',hutTipp:'Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',
  zauberhutKF:'Zauberhut! {y} = Kraft wählen',keinGegner:'Kein Gegner in Reichweite',verbKosten:'Verbessern kostet 6 Holz + 3 Erz',
  spielerN:n=>'Spieler '+n,spielerH:'Spieler',
  waehle:m=>'Wähle deine Seite'+({p:' ◀ ▶',t:': nach links oder rechts wischen',k:': A/D, Pfeiltasten oder Seite anklicken'})[m],
@@ -214,19 +214,19 @@ function cpOp(o){if(o.s==2){const xs=o.a.map(q=>q[0]),ys=o.a.map(q=>q[1]);o.bb=[
 function cpInPoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>y)!=(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
 // Burg-Daten (linke Burg; rechte gespiegelt): Hof T1 (Höhe 0, Mauern), Terrasse T2 (40), Thron-Terrasse T3 (80), Kerker-Grube (-28)
 const CPBG={t1:[40,520,540,900],t2:[50,480,40,560],t3:[120,400,40,250],pit:[170,790,80],pitR:[240,310,760,820],
- st:[[170,230,250,310,'y',80,40],[290,350,250,310,'y',80,40],[210,270,560,620,'y',40,0],[370,430,560,620,'y',40,0]],
- tow:[[485,50,0,140],[520,548,0,105],[520,622,0,105],[520,758,0,105],[520,900,0,85],[40,900,0,85],[400,250,40,90],[120,250,40,90],[400,45,40,120]],
+ st:[[170,230,250,310,"y",110,60],[290,350,250,310,"y",110,60],[210,270,560,620,"y",60,0],[370,430,560,620,"y",60,0]],
+ tow:[[485,50,0,165],[520,548,0,125],[520,622,0,125],[520,758,0,125],[520,900,0,105],[40,900,0,105],[400,250,60,95],[120,250,60,95],[400,45,60,120]],
  br:[700,820,225,285]};
 cpOp({s:2,a:WATP,h:-8,f:2});
 for(const t of [0,1]){const R=a=>t?[LW-a[1],LW-a[0],a[2],a[3]]:a,X=x=>t?LW-x:x,B=CPBG;
  cpOp({s:0,a:R(B.br),h:3,f:0});
  if(!t)for(const r of [[-400,720,-400,40],[800,1120,-400,40],[1200,2320,-400,40],[-400,40,-400,1400],[1880,2320,-400,1400],[-400,790,940,1400],[1130,2320,940,1400]])cpOp({s:0,a:r,h:140,f:1});
- cpOp({s:0,a:R(B.t1),h:0,f:0});cpOp({s:0,a:R(B.t2),h:40,f:0});cpOp({s:0,a:R(B.t3),h:80,f:0});
+ cpOp({s:0,a:R(B.t1),h:0,f:0});cpOp({s:0,a:R(B.t2),h:60,f:0});cpOp({s:0,a:R(B.t3),h:110,f:0});
  for(const s of B.st)cpOp({s:0,a:R(s),ax:s[4],h0:s[5],h1:s[6]});
  cpOp({s:1,a:[X(B.pit[0]),B.pit[1],B.pit[2]],h:-28,f:0});
  cpOp({s:0,a:R(B.pitR),ax:'x',h0:t?0:-28,h1:t?-28:0});
  for(const o of B.tow)cpOp({s:1,a:[X(o[0]),o[1],16],h:200,f:1})}
-for(const r of WALLL)cpOp({s:0,a:r,h:70,f:1});
+for(const r of WALLL)cpOp({s:0,a:r,h:90,f:1});
 for(const c of [[960,60,45],[690,55,26],[1230,55,26]])cpOp({s:1,a:c,h:60,f:1});
 for(const o of CPT)if(o.ax)o.f=0;
 // Höhe (Welt) und Art (cpF) an Kartenpunkt x,y
@@ -244,16 +244,19 @@ function cpSeg(x0,y0,x1,y1){const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.ce
  for(let k=1;k<=n;k++){const x=x0+(x1-x0)*k/n,y=y0+(y1-y0)*k/n,h=cpHL(x,y);if(cpF||Math.abs(h-hp)>8)return false;if(k%2==0&&!cpOK(x,y,h,9))return false;hp=h}return true}
 // Figur gegen Gelände: Bewegung seit letzter gültiger Position (p.lx/p.ly) prüfen, an Kanten entlanggleiten
 function cpTerr(p){const s=1/SCL,ox=p.lx,oy=p.ly;
- if(ox===undefined||Math.abs(p.x-ox)+Math.abs(p.y-oy)>300){p.lx=p.x;p.ly=p.y;return}
- const h0=cpHL(ox*s,oy*s);
- const dx=p.x-ox,dy=p.y-oy;
- if(!cpOK(ox*s,oy*s,h0)||cpOK(p.x*s,p.y*s,h0)){}else if(cpOK(p.x*s,oy*s,h0))p.y=oy;else if(cpOK(ox*s,p.y*s,h0))p.x=ox;
+ if(ox===undefined||Math.abs(p.x-ox)+Math.abs(p.y-oy)>300){p.lx=p.vx=p.x;p.ly=p.vy=p.y;return}
+ const h0=cpHL(ox*s,oy*s),fo=cpF,dx=p.x-ox,dy=p.y-oy;
+ if(fo){if(p.vx!==undefined){p.x=p.vx;p.y=p.vy}} // Mitte steckt in Mauer/Wasser: zurück zur letzten gültigen Stelle
+ else if(!cpOK(ox*s,oy*s,h0)){const hn=cpHL(p.x*s,p.y*s);if(cpF||Math.abs(hn-h0)>14){p.x=ox;p.y=oy}} // Rand berührt schon eine Kante: nur die Mitte prüfen (nie durch Mauern, nie über Stufen)
+ else{if(cpOK(p.x*s,p.y*s,h0)){}else if(cpOK(p.x*s,oy*s,h0))p.y=oy;else if(cpOK(ox*s,p.y*s,h0))p.x=ox;
  else{let ok=false;for(const a of [.785,-.785,1.571,-1.571]){const c=Math.cos(a)*.8,sn=Math.sin(a)*.8,nx=ox+dx*c-dy*sn,ny=oy+dx*sn+dy*c;if(cpOK(nx*s,ny*s,h0)){p.x=nx;p.y=ny;ok=true;break}}if(!ok){p.x=ox;p.y=oy}}
+ p.vx=p.x;p.vy=p.y}
  p.lx=p.x;p.ly=p.y}
 // Wegnetz für Bots: Raster NC, Knoten begehbar (NW), Kanten als Bitmaske (NE), A*
-const NC=20,NX=LW/NC,NY=LH/NC,NN=NX*NY,NW=new Uint8Array(NN),NE=new Uint8Array(NN),DXN=[1,-1,0,0,1,1,-1,-1],DYN=[0,0,1,-1,1,-1,1,-1],DOP=[1,0,3,2,7,6,5,4];
+const NC=20,NX=LW/NC,NY=LH/NC,NN=NX*NY,NG=new Uint8Array(NN),NW=new Uint8Array(NN),NE=new Uint8Array(NN),DXN=[1,-1,0,0,1,1,-1,-1],DYN=[0,0,1,-1,1,-1,1,-1],DOP=[1,0,3,2,7,6,5,4];
 const cpAG=new Float32Array(NN),cpAF=new Float32Array(NN),cpAP=new Int32Array(NN),cpAS=new Uint32Array(NN),cpACl=new Uint32Array(NN),cpAH=new Int32Array(NN*8);let cpAT=0;
 function cpNavBuild(){const blk=[...OBS,...BLD,...ORE,TW].map(o=>[o.x/SCL,o.y/SCL,o.r/SCL+8]);
+ GATE.forEach((G,gi)=>{const r=G.r.map(v=>v/SCL);for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=(i+.5)*NC,y=(j+.5)*NC;if(x>r[0]-12&&x<r[1]+12&&y>r[2]&&y<r[3])NG[j*NX+i]=gi+1}});
  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=(i+.5)*NC,y=(j+.5)*NC,h=cpHL(x,y),n=j*NX+i;NW[n]=!cpF&&cpOK(x,y,h,8)&&!blk.some(b=>Math.hypot(x-b[0],y-b[1])<b[2])?1:0}
  for(let n=0;n<NN;n++){if(!NW[n])continue;const i=n%NX,j=n/NX|0;
   for(const d of [0,2,4,6]){const ii=i+DXN[d],jj=j+DYN[d];if(ii<0||jj<0||ii>=NX||jj>=NY)continue;const m=jj*NX+ii;if(!NW[m])continue;
@@ -261,39 +264,32 @@ function cpNavBuild(){const blk=[...OBS,...BLD,...ORE,TW].map(o=>[o.x/SCL,o.y/SC
    if(cpSeg((i+.5)*NC,(j+.5)*NC,(ii+.5)*NC,(jj+.5)*NC)){NE[n]|=1<<d;NE[m]|=1<<DOP[d]}}}}
 function cpNode(x,y){const i=Math.max(0,Math.min(NX-1,x/NC|0)),j=Math.max(0,Math.min(NY-1,y/NC|0));if(NW[j*NX+i])return j*NX+i;
  for(let r=1;r<7;r++){let b=-1,bd=1e9;for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){if(Math.max(Math.abs(di),Math.abs(dj))!=r)continue;const ii=i+di,jj=j+dj;if(ii<0||jj<0||ii>=NX||jj>=NY)continue;const n=jj*NX+ii,d=di*di+dj*dj;if(NW[n]&&d<bd){bd=d;b=n}}if(b>=0)return b}return -1}
-function cpAstar(s,g){cpAT++;let hn=0;const gx=g%NX,gy=g/NX|0,G=cpAG,F=cpAF,Hp=cpAH;
+// heile gegnerische Tor-Teile (Team T) sind zu
+function cpGH(x0,y0,x1,y1,T){const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/4));for(const G of GATE){if(G.t==T||G.hp<=0)continue;const r=G.r;for(let k=0;k<=n;k++){const x=(x0+(x1-x0)*k/n)*SCL,y=(y0+(y1-y0)*k/n)*SCL;if(x>r[0]-15&&x<r[1]+15&&y>r[2]&&y<r[3])return true}}return false}
+function cpAstar(s,g,T){cpAT++;let hn=0;const gx=g%NX,gy=g/NX|0,G=cpAG,F=cpAF,Hp=cpAH;
  const hu=n=>{const dx=Math.abs(n%NX-gx),dy=Math.abs((n/NX|0)-gy);return dx+dy-.586*Math.min(dx,dy)};
  const push=n=>{let k=hn++;while(k>0){const q=(k-1)>>1;if(F[Hp[q]]<=F[n])break;Hp[k]=Hp[q];k=q}Hp[k]=n};
  const pop=()=>{const r=Hp[0],n=Hp[--hn];let k=0;for(;;){let c=2*k+1;if(c>=hn)break;if(c+1<hn&&F[Hp[c+1]]<F[Hp[c]])c++;if(F[Hp[c]]>=F[n])break;Hp[k]=Hp[c];k=c}Hp[k]=n;return r};
  cpAS[s]=cpAT;G[s]=0;F[s]=hu(s);cpAP[s]=-1;push(s);
  while(hn&&hn<NN*8-8){const n=pop();if(n==g)break;if(cpACl[n]==cpAT)continue;cpACl[n]=cpAT;const e=NE[n],x=n%NX,y=n/NX|0;
-  for(let d=0;d<8;d++){if(!(e&1<<d))continue;const m=(y+DYN[d])*NX+x+DXN[d];if(cpACl[m]==cpAT)continue;const ng=G[n]+(d<4?1:1.414);
+  for(let d=0;d<8;d++){if(!(e&1<<d))continue;const m=(y+DYN[d])*NX+x+DXN[d];if(cpACl[m]==cpAT)continue;if(T!=null&&NG[m]){const G=GATE[NG[m]-1];if(G.t!=T&&G.hp>0)continue}const ng=G[n]+(d<4?1:1.414);
    if(cpAS[m]!=cpAT||ng<G[m]){cpAS[m]=cpAT;G[m]=ng;F[m]=ng+hu(m);cpAP[m]=n;push(m)}}}
  if(cpAS[g]!=cpAT)return null;const P=[];for(let n=g;n>=0&&P.length<NN;n=cpAP[n])P.push(n);return P.reverse()}
 // Wegpunkt für Bot p zum Ziel t (Weltkoordinaten); Weg wird alle ~0,5 s oder bei Zielwechsel neu berechnet
 function cpNav(p,t){const now=performance.now(),s=1/SCL;
- if(!p.carry){const W2=WARP[p.team],d0=Math.hypot(t.x-p.x,t.y-p.y);if(d0>1500)for(const [A,B] of [[W2.a,W2.b],[W2.b,W2.a]])if(Math.hypot(A.x-p.x,A.y-p.y)+Math.hypot(t.x-B.x,t.y-B.y)<d0*.55){t=A;break}}
  if(!p.nvN||now>p.nvN||Math.hypot(t.x-p.nvX,t.y-p.nvY)>150){
   p.nvN=now+350+Math.random()*300;p.nvX=t.x;p.nvY=t.y;p.nvP=null;
   const x0=p.x*s,y0=p.y*s,x1=t.x*s,y1=t.y*s;
-  if(!(Math.hypot(x1-x0,y1-y0)<500&&cpSeg(x0,y0,x1,y1))){
-   const a=cpNode(x0,y0),b=cpNode(x1,y1),P=a>=0&&b>=0&&a!=b?cpAstar(a,b):null;
+  if(!(Math.hypot(x1-x0,y1-y0)<500&&cpSeg(x0,y0,x1,y1)&&!cpGH(x0,y0,x1,y1,p.team))){
+   const a=cpNode(x0,y0),b=cpNode(x1,y1),P=a>=0&&b>=0&&a!=b?(cpAstar(a,b,p.team)||cpAstar(a,b,null)):null;
    if(P){const pts=P.map(n=>[(n%NX+.5)*NC,((n/NX|0)+.5)*NC]);pts.push([x1,y1]);const out=[];let cx=x0,cy=y0,i=0;
-    while(i<pts.length){let j=i;while(j+1<pts.length&&j-i<12&&cpSeg(cx,cy,pts[j+1][0],pts[j+1][1]))j++;out.push(pts[j]);cx=pts[j][0];cy=pts[j][1];i=j+1}
+    while(i<pts.length){let j=i;while(j+1<pts.length&&j-i<12&&cpSeg(cx,cy,pts[j+1][0],pts[j+1][1])&&!cpGH(cx,cy,pts[j+1][0],pts[j+1][1],p.team))j++;out.push(pts[j]);cx=pts[j][0];cy=pts[j][1];i=j+1}
     p.nvP=out.map(q=>({x:q[0]*SCL,y:q[1]*SCL}));p.nvI=0}}}
  if(now>(p.nvSt||0)){const mv=Math.hypot(p.x-(p.nvSx||0),p.y-(p.nvSy||0));p.nvSx=p.x;p.nvSy=p.y;p.nvSt=now+600;if(mv<12&&Math.hypot(t.x-p.x,t.y-p.y)>60){const n=cpNode(p.x*s,p.y*s);if(n>=0){p.nvU={x:(n%NX+.5)*NC*SCL,y:((n/NX|0)+.5)*NC*SCL,e:now+450};p.nvN=now+450}}}
  if(p.nvU&&now<p.nvU.e&&Math.hypot(p.nvU.x-p.x,p.nvU.y-p.y)>8)return p.nvU;
  if(!p.nvP)return t;
  while(p.nvI<p.nvP.length-1&&Math.hypot(p.nvP[p.nvI].x-p.x,p.nvP[p.nvI].y-p.y)<40)p.nvI++;
  return p.nvI>=p.nvP.length-1?t:p.nvP[p.nvI]}
-// Teleporter je Team: a = Burg-Terrasse, b = vorne an der Brücke. Drauflaufen = teleportieren, 1,5 s stehen bleiben = zurück; nicht mit Prinzessin
-const WARP=[0,1].map(t=>({t,a:{x:(t?LW-270:270)*SCL,y:500*SCL},b:{x:(t?LW-650:650)*SCL,y:330*SCL},r:24*SCL}));
-function cpWarp(p,dt){if(p.dead>0){p.wIn=false;return}p.wcd=Math.max(0,(p.wcd||0)-dt);const W2=WARP[p.team];let on=null,to=null;
- for(const [A,B] of [[W2.a,W2.b],[W2.b,W2.a]])if(Math.hypot(p.x-A.x,p.y-A.y)<W2.r){on=A;to=B}
- const was=p.wIn;p.wIn=!!on;p.wSt=on?(was?(p.wSt||0)+dt:0):0;if(!on||p.wcd>0||(was&&p.wSt<1.5))return;
- if(p.carry){if(p.src&&!(p.nt>performance.now())){p.nt=performance.now()+1800;KF.push({t:2.5,s:tx("warpPrin"),src:p.src})}return}
- pulses.push({x:p.x,y:p.y,life:.6,max:.6,r:90,col:hx(p.team)});p.x=to.x+(Math.random()-.5)*20;p.y=to.y+(Math.random()-.5)*20;p.lx=undefined;p.nvP=null;p.nvN=0;p.kx=p.ky=0;p.wcd=1;p.wSt=0;p.wIn=true;
- pulses.push({x:p.x,y:p.y,life:.6,max:.6,r:90,col:hx(p.team)});sfx("lift");if(p.src){rumble(p,90,.3,.4);if(cpTipOnce("warp"))KF.push({t:3.5,s:tx("warpTipp"),src:p.src})}}
 const CSP=[[600,280],[LW-600,280],[620,650],[LW-620,650],[870,330],[LW-870,330]].map(a=>({x:a[0]*SCL,y:a[1]*SCL,c:null,t:0}));
 cpNavBuild();
 function wallPush(p,r){const cx=Math.max(r[0],Math.min(r[1],p.x)),cy=Math.max(r[2],Math.min(r[3],p.y)),dx=p.x-cx,dy=p.y-cy,d=Math.hypot(dx,dy);
@@ -360,7 +356,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25d';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25e';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -579,7 +575,7 @@ function step(dt){
   p.x=Math.max(16,Math.min(WW-16,p.x));p.y=Math.max(16,Math.min(HH-16,p.y));
   for(const G of GATE)if(G.t!=p.team&&G.hp>0)wallPush(p,G.r);
   {const o=TW,dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(TW.owner!=p.team&&d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}
-  for(const o of OBS.concat(BLD,ORE)){const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}cpTerr(p);cpWarp(p,dt);
+  for(const o of OBS.concat(BLD,ORE)){const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}cpTerr(p);
   p.cd-=dt;p.sw-=dt;p.ct-=dt;p.spin-=dt;p.bw=Math.max(0,(p.bw||0)-dt);p.inv=Math.max(0,(p.inv||0)-dt);if(p.zw>0){p.zw-=dt;if(p.zw<=0)zauber(p,p.zs)}else if(p.bc){p.zt-=dt;if(p.zt<=0)zauberEnd(p)}else if(p.zh&&p.zc<1){p.zc=Math.min(1,p.zc+dt/30);if(p.zc>=1&&p.src){sfx('score');rumble(p,100,.3,.5)}}if(p.cls>=6){const o=p.mp||0;p.mp=Math.min(1,o+dt/30);if(o<1&&p.mp>=1){sfx('score');rumble(p,100,.3,.5)}}p.pk=(p.pk||0)-dt;
   const rel=p.prev&&!inp.a&&!p.cx&&!p.carry&&p.dash<=0,big=rel&&p.ch>=.8,tap=rel&&!big,och=p.ch;
   if(inp.a&&!p.carry&&!p.cx&&p.dash<=0&&!(p.gst>0))p.ch=Math.min(1.4,p.ch+dt);else p.ch=0;
@@ -882,8 +878,7 @@ const MFALL=new THREE.MeshBasicMaterial({map:FTX});
 for(const [x,w,y0,y1,z] of [[760,96,0,56,-19],[1160,96,0,56,-19],[960,344,-280,.5,1011]]){const g=new THREE.PlaneGeometry(w,y1-y0),uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*w/40,uv.getY(i)*(y1-y0)/60);const m=new THREE.Mesh(g,MFALL);m.position.set(x-LW/2,(y0+y1)/2,z-LH/2);LG.add(m)}
 const MFOAM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,depthWrite:false}),cpFoam=[];
 for(const [x,y,r] of [[760,-6,30],[1160,-6,30],[738,8,16],[784,6,15],[1136,8,16],[1182,6,15]]){const m=new THREE.Mesh(cpGeo('foam',()=>new THREE.CircleGeometry(1,16)),MFOAM);m.rotation.x=-Math.PI/2;m.position.set(x-LW/2,1,y-LH/2);m.scale.setScalar(r);m.userData.r=r;LG.add(m);cpFoam.push(m)}
-function cpMapAnim(now){const s=now/1000;WTX.offset.set(s*.012,s*.006);FTX.offset.y=s*1.3;cpFoam.forEach((m,i)=>m.scale.setScalar(m.userData.r*(1+.12*Math.sin(s*5+i*1.7))));
- cpWarpM.forEach((w,i)=>{const u=(s*.8+i*.25)%1;w.r.position.y=3+u*22;w.r.material.opacity=1-u;w.r.material.transparent=true;w.r.scale.setScalar(1-u*.3);w.o.position.y=6+3*Math.sin(s*3+i);w.o.rotation.z=s*2;w.d.material.opacity=.7+.2*Math.sin(s*4+i)})}
+function cpMapAnim(now){const s=now/1000;WTX.offset.set(s*.012,s*.006);FTX.offset.y=s*1.3;cpFoam.forEach((m,i)=>m.scale.setScalar(m.userData.r*(1+.12*Math.sin(s*5+i*1.7))))}
 // Felsen: oben (Kerben für die Wasserfälle), links/rechts, Klippe unten (schwebende Insel)
 const RTX=cpTexC(256,256,(k,w)=>{k.fillStyle="#9b978c";k.fillRect(0,0,w,w);for(let i=0;i<60;i++){const x=cpRnd()*w,y=cpRnd()*w,r=14+cpRnd()*20,a=cpRnd()*3,c=["#c4c0b4","#b3afa3","#d2cec2"][i%3];cpWrap(w,w,(ox,oy)=>{k.fillStyle=c;k.strokeStyle='#45423e';k.lineWidth=3;k.beginPath();k.ellipse(x+ox,y+oy,r,r*.7,a,0,7);k.fill();k.stroke()})}},1/40);
 const MROCK=cpLM(RTX),MGRS=cpMat(0x4f8f34);
@@ -908,8 +903,8 @@ const cpStepL=[],cpWallL=[],cpMerL=[],cpTowL=[],cpPlL=[],cpRailL=[],cpFLG=[];
 const MPITW=new THREE.MeshLambertMaterial({color:0x7a5a74,side:THREE.BackSide});
 for(const t of [0,1]){const B=CPBG,R=a=>t?[LW-a[1],LW-a[0],a[2],a[3]]:a,X=x=>t?LW-x:x,RR=(a,r)=>cpMX(cpRR(a[0],a[1],a[2],a[3],r),t),tc=hx(t);
  cpSlab(RR(B.t1,4),[cpPit(t)],0,2,[MCY,MSIDE]);
- cpSlab(RR(B.t2,16),null,0,40,[MCAP,MSIDE],1.2);
- cpSlab(RR(B.t3,16),null,0,80,[MCAP3,MSIDE],1.2);
+ cpSlab(RR(B.t2,16),null,0,60,[MCAP,MSIDE],1.2);
+ cpSlab(RR(B.t3,16),null,0,110,[MCAP3,MSIDE],1.2);
  for(const s of B.st){const a=R(s),n=6,L=s[3]-s[2];for(let i=0;i<n;i++){const y0=a[2]+L*i/n,y1=a[2]+L*(i+1)/n,h=(s[5]+(s[6]-s[5])*(i+.5)/n)/SCL;cpStepL.push([(a[0]+a[1])/2-LW/2,h/2,(y0+y1)/2-LH/2,a[1]-a[0],h,y1-y0])}}
  // Kerker-Grube
  const px=X(170)-LW/2,pz=790-LH/2,ph=28/SCL;
@@ -918,19 +913,19 @@ for(const t of [0,1]){const B=CPBG,R=a=>t?[LW-a[1],LW-a[0],a[2],a[3]]:a,X=x=>t?L
  const rp=cpPart(LG,cpGeo('pitr',()=>new THREE.BoxGeometry(Math.hypot(70,ph),1,60)),0x9a8a76,X(275)-LW/2,-ph/2-.4,pz);rp.rotation.z=(t?-1:1)*Math.atan2(ph,70);
  for(const zz of [760,820])cpPart(LG,cpGeo('pits',()=>new THREE.BoxGeometry(66,ph,1.5)),0x7a5a74,X(277)-LW/2,-ph/2,zz-LH/2);
  // Teppich zum Thron
- cpPart(LG,cpGeo('tep',()=>new THREE.BoxGeometry(40,.3,130)),tc,X(260)-LW/2,80/SCL+.15,185-LH/2);
+ cpPart(LG,cpGeo('tep',()=>new THREE.BoxGeometry(40,.3,130)),tc,X(260)-LW/2,110/SCL+.15,185-LH/2);
  // Zinnen auf Terrassen-Kanten (Lücken an Treppen)
  const gap=(v,G)=>G.some(g=>v>g[0]-6&&v<g[1]+6);
- for(let y=70;y<540;y+=18)cpMerL.push([X(476)-LW/2,40/SCL+3,y-LH/2]);
- for(let x=64;x<470;x+=18)if(!gap(x,[[210,270],[370,430]]))cpMerL.push([X(x)-LW/2,40/SCL+3,556-LH/2]);
- for(let x=140;x<390;x+=18)if(!gap(x,[[170,230],[290,350]]))cpMerL.push([X(x)-LW/2,80/SCL+3,246-LH/2]);
- for(let y=64;y<236;y+=18)for(const xx of [124,396])cpMerL.push([X(xx)-LW/2,80/SCL+3,y-LH/2]);
+ for(let y=70;y<540;y+=18)cpMerL.push([X(476)-LW/2,60/SCL+3,y-LH/2]);
+ for(let x=64;x<470;x+=18)if(!gap(x,[[210,270],[370,430]]))cpMerL.push([X(x)-LW/2,60/SCL+3,556-LH/2]);
+ for(let x=140;x<390;x+=18)if(!gap(x,[[170,230],[290,350]]))cpMerL.push([X(x)-LW/2,110/SCL+3,246-LH/2]);
+ for(let y=64;y<236;y+=18)for(const xx of [124,396])cpMerL.push([X(xx)-LW/2,110/SCL+3,y-LH/2]);
  for(const o of B.tow)cpTowL.push([X(o[0])-LW/2,o[2]/SCL,o[1]-LH/2,o[3]/SCL,t]);
  // Brücke (Planken quer, Geländer)
  const br=R(B.br);for(let x=br[0]+4;x<br[1];x+=10)cpPlL.push([x-LW/2,.6,(br[2]+br[3])/2-LH/2,8,1.2,br[3]-br[2]]);
  for(const zz of [br[2]+1,br[3]-1]){cpRailL.push([(br[0]+br[1])/2-LW/2,5,zz-LH/2,br[1]-br[0],2,2]);for(const xx of [br[0]+2,(br[0]+br[1])/2,br[1]-2])cpRailL.push([xx-LW/2,3,zz-LH/2,3,6,3])}}
-for(const r of WALLL){const w=r[1]-r[0],d=r[3]-r[2],cx=(r[0]+r[1])/2-LW/2,cz=(r[2]+r[3])/2-LH/2;cpWallL.push([cx,14,cz,w,28,d]);
- if(w>d){for(let x=r[0]+8;x<r[1]-4;x+=18)cpMerL.push([x-LW/2,31,cz])}else for(let y=r[2]+8;y<r[3]-4;y+=18)cpMerL.push([cx,31,y-LH/2])}
+for(const r of WALLL){const w=r[1]-r[0],d=r[3]-r[2],cx=(r[0]+r[1])/2-LW/2,cz=(r[2]+r[3])/2-LH/2;cpWallL.push([cx,18,cz,w,36,d]);
+ if(w>d){for(let x=r[0]+8;x<r[1]-4;x+=18)cpMerL.push([x-LW/2,39,cz])}else for(let y=r[2]+8;y<r[3]-4;y+=18)cpMerL.push([cx,39,y-LH/2])}
 cpInst(cpGeo('ub',()=>new THREE.BoxGeometry(1,1,1)),cpMat(0xe2c68c),cpStepL,1);
 cpInst(cpGeo('ub',()=>new THREE.BoxGeometry(1,1,1)),cpMat(0xf2e4c8),cpWallL,1.2);
 cpInst(cpGeo('mer',()=>new THREE.BoxGeometry(9,6,9)),cpMat(0xf2e4c8),cpMerL.map(a=>[a[0],a[1],a[2],1,1,1]),1);
@@ -941,17 +936,11 @@ cpInst(new THREE.CylinderGeometry(1,1.12,1,14),cpMat(0xf2e4c8),cpTowL.map(a=>[a[
 cpInst(new THREE.CylinderGeometry(1.1,1.1,1,14),new THREE.MeshLambertMaterial({color:0xffffff}),cpTowL.map(a=>[a[0],a[1]+a[3]-2,a[2],16,4,16,hx(a[4])]));
 cpInst(new THREE.ConeGeometry(1,1,14),new THREE.MeshLambertMaterial({color:0xffffff}),cpTowL.map(a=>[a[0],a[1]+a[3]+9,a[2],21,19,21,hx(a[4])]),1.3);
 cpTowL.forEach((a,k)=>{if(![0,4,8].includes(k%9))return;const top=a[1]+a[3]+18;mesh(cpGeo('fp',()=>new THREE.CylinderGeometry(.8,.8,30,6)),0x6b4a2a,a[0],top+11,a[2],LG);const bg=cpGeo('fb',()=>{const g=new THREE.BoxGeometry(20,11,.8);g.translate(10,0,0);return g}),f=mesh(bg,hx(a[4]),a[0],top+20,a[2],LG);f.castShadow=false;cpFLG.push(f)});
-// Teleporter-Plattformen (Teamfarbe, Ring schwebt)
-const cpWarpM=[];for(const W2 of WARP)for(const A of [W2.a,W2.b]){const gp=new THREE.Group();gp.position.set(wxl(A.x/SCL),dep(A.x,A.y)/SCL,wzl(A.y/SCL));LG.add(gp);
- cpPart(gp,cpGeo("wb",()=>new THREE.CylinderGeometry(24,26,2.4,24)),0xb9aea0,0,1.2,0,{ol:.8});
- const d=new THREE.Mesh(cpGeo("wd",()=>new THREE.CircleGeometry(19,24)),new THREE.MeshBasicMaterial({color:hx(W2.t),transparent:true,opacity:.85}));d.rotation.x=-Math.PI/2;d.position.y=2.5;gp.add(d);
- const r=new THREE.Mesh(cpGeo("wr",()=>new THREE.TorusGeometry(16,1.3,6,28)),new THREE.MeshBasicMaterial({color:0xffffff}));r.rotation.x=Math.PI/2;gp.add(r);
- const o=new THREE.Mesh(cpGeo("wo",()=>new THREE.TorusGeometry(10,1,6,20)),new THREE.MeshBasicMaterial({color:hx(W2.t)}));o.rotation.x=Math.PI/2;gp.add(o);cpWarpM.push({d,r,o})}
 // Deko-Bäume auf den Felsen (Positionen für buildMap: [x,z,y] lokal)
 const cpTP=[];
 for(let i=0;i<80;i++){const x=-300+cpRnd()*2520,y=-280+cpRnd()*300;if(y>-50&&((x>690&&x<830)||(x>1090&&x<1230)))continue;cpTP.push([x-LW/2,y-LH/2,56])}
 for(const sx of [0,1])for(let i=0;i<28;i++){const x=sx?1905+cpRnd()*300:-285+cpRnd()*300,y=60+cpRnd()*880;cpTP.push([x-LW/2,y-LH/2,56])}
-const gm=GATE.map(G=>mesh(new THREE.BoxGeometry(16*SCL,60,(G.r[3]-G.r[2])-4*SCL),0x8a5a2b,wx(G.r[0]+8*SCL),30,wz((G.r[2]+G.r[3])/2)));gm.forEach(m=>m.add(new THREE.Mesh(cpSG(m.geometry),cpOutM(3))));
+const gm=GATE.map(G=>mesh(new THREE.BoxGeometry(16*SCL,80,(G.r[3]-G.r[2])-4*SCL),0x8a5a2b,wx(G.r[0]+8*SCL),40,wz((G.r[2]+G.r[3])/2)));gm.forEach(m=>m.add(new THREE.Mesh(cpSG(m.geometry),cpOutM(3))));
 const BLG=[],NOTM=new THREE.MeshBasicMaterial({color:0x2a1610}),obsG=new THREE.Group();sc.add(obsG);const trG=new THREE.Group();LG.add(trG);
 const TRG1=new THREE.CylinderGeometry(4,5,1,8),TRG2=new THREE.SphereGeometry(1,12,9),TRN=cpTP.length;let trMat=[];
 function buildMap(){const K=MAPS[MAPI];OBS=K.obs;gr.material.color.setHex(K.g);sc.background.setHex(K.sk);sc.fog.color.setHex(K.sk);STR.forEach(s=>s.material.color.setHex(K.s));
@@ -1118,13 +1107,12 @@ function hud(){
 // Minikarte: Vollbild unten mittig, Splitscreen oben mittig unter den Wappen; nur wenn ein Mensch spielt. Bild der Karte einmalig aus CPT (cpMMC)
 let cpMMC=null;
 function cpMMBuild(){const c=document.createElement("canvas"),w=300,h=150;c.width=w;c.height=h;const k=c.getContext("2d");k.scale(w/LW,h/LH);k.fillStyle="#77b84c";k.fillRect(0,0,LW,LH);
- for(const o of CPT){const a=o.a;k.fillStyle=o.f==2?"#3d8fd0":o.ax?"#e8d3a2":o.h==140||o.h==60?"#8d8a80":o.h==3?"#b07a45":o.h==0?"#c9a39a":o.h==40?"#e2c68c":o.h==80?"#f0dcaa":o.h==-28?"#6b4f68":"#f2e4c8";
+ for(const o of CPT){const a=o.a;k.fillStyle=o.f==2?"#3d8fd0":o.ax?"#e8d3a2":o.h==140||o.f==1&&o.s==1&&o.h==60?"#8d8a80":o.h==3?"#b07a45":o.h==0?"#c9a39a":o.h==60?"#e2c68c":o.h==110?"#f0dcaa":o.h==-28?"#6b4f68":"#f2e4c8";
   k.beginPath();if(o.s==0)k.rect(a[0],a[2],a[1]-a[0],a[3]-a[2]);else if(o.s==1)k.arc(a[0],a[1],a[2],0,7);else a.forEach((q,i)=>i?k.lineTo(q[0],q[1]):k.moveTo(q[0],q[1]));k.fill()}
  cpMMC=c}
 function cpMiniMap(){if(menu||over>=0||!players.some(p=>p.src))return;if(!cpMMC)cpMMBuild();
  const w=150,h=75,x=W/2-w/2,y=cpSV?98:H-h-10,s=w/WW,dot=(px,py,r,f,st,lw)=>{g.beginPath();g.arc(x+px*s,y+py*s,r,0,7);g.fillStyle=f;g.fill();if(st){g.lineWidth=lw||1.5;g.strokeStyle=st;g.stroke()}};
  g.save();g.globalAlpha=.9;hrr(x-4,y-4,w+8,h+8,8);g.fillStyle="#2a1610";g.fill();g.drawImage(cpMMC,x,y,w,h);g.globalAlpha=1;
- for(const W2 of WARP)for(const A of [W2.a,W2.b])dot(A.x,A.y,2.6,COL[W2.t],"#fff",1);
  dot(TW.x,TW.y,4,TW.owner<0?"#ccc":COL[TW.owner],"#2a1610");
  for(const t of [0,1])dot(prin[t].x,prin[t].y,4.5,"#ff9fc2",COL[t],2);
  for(const p of players)if(p.dead<=0)dot(p.x,p.y,p.src?3.6:2.4,COL[p.team],p.src?"#fff":null);
