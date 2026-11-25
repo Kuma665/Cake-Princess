@@ -39,7 +39,7 @@ function cpLine(e){const m=((e&&e.stack)||'').match(/:(\d+):\d+\)?\s*(\n|$)/);re
 // Alle sichtbaren Texte (Deutsch) an einer Stelle, für spätere Übersetzung. Werte mit {a} {b} {y} … sind Tastenplatzhalter, Funktionen bekommen Werte.
 const TX={
  titel:'Cake Princess',spezBereit:'Spezial bereit!',hilfe:'Hilfe!',ninjaUnsicht:'Ninja (unsichtbar)',spezial:'Spezial: {y}',ablegen:'{b}: ablegen',essen:'Ablegen halten: essen',bau:'Bau: 3 Holz',prinzessin:'Prinzessin',aufheben:'{b}: aufheben',thron:'Thron',kerker:'Kerker ▼',zauberhut:'Zauberhut',
- verbessern:'Draufschlagen: verbessern (6 Holz, 3 Erz)',hutTipp:'Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',
+ verbessern:'Draufschlagen: verbessern (6 Holz, 3 Erz)',hutTipp:'Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',warpTipp:"Teleporter! Bringt dich zwischen Burg und Brücke hin und her.",warpPrin:"Mit der Prinzessin geht kein Teleporter!",
  zauberhutKF:'Zauberhut! {y} = Kraft wählen',keinGegner:'Kein Gegner in Reichweite',verbKosten:'Verbessern kostet 6 Holz + 3 Erz',
  spielerN:n=>'Spieler '+n,spielerH:'Spieler',
  waehle:m=>'Wähle deine Seite'+({p:' ◀ ▶',t:': nach links oder rechts wischen',k:': A/D, Pfeiltasten oder Seite anklicken'})[m],
@@ -272,6 +272,7 @@ function cpAstar(s,g){cpAT++;let hn=0;const gx=g%NX,gy=g/NX|0,G=cpAG,F=cpAF,Hp=c
  if(cpAS[g]!=cpAT)return null;const P=[];for(let n=g;n>=0&&P.length<NN;n=cpAP[n])P.push(n);return P.reverse()}
 // Wegpunkt für Bot p zum Ziel t (Weltkoordinaten); Weg wird alle ~0,5 s oder bei Zielwechsel neu berechnet
 function cpNav(p,t){const now=performance.now(),s=1/SCL;
+ if(!p.carry){const W2=WARP[p.team],d0=Math.hypot(t.x-p.x,t.y-p.y);if(d0>1500)for(const [A,B] of [[W2.a,W2.b],[W2.b,W2.a]])if(Math.hypot(A.x-p.x,A.y-p.y)+Math.hypot(t.x-B.x,t.y-B.y)<d0*.55){t=A;break}}
  if(!p.nvN||now>p.nvN||Math.hypot(t.x-p.nvX,t.y-p.nvY)>150){
   p.nvN=now+350+Math.random()*300;p.nvX=t.x;p.nvY=t.y;p.nvP=null;
   const x0=p.x*s,y0=p.y*s,x1=t.x*s,y1=t.y*s;
@@ -285,6 +286,14 @@ function cpNav(p,t){const now=performance.now(),s=1/SCL;
  if(!p.nvP)return t;
  while(p.nvI<p.nvP.length-1&&Math.hypot(p.nvP[p.nvI].x-p.x,p.nvP[p.nvI].y-p.y)<40)p.nvI++;
  return p.nvI>=p.nvP.length-1?t:p.nvP[p.nvI]}
+// Teleporter je Team: a = Burg-Terrasse, b = vorne an der Brücke. Drauflaufen = teleportieren, 1,5 s stehen bleiben = zurück; nicht mit Prinzessin
+const WARP=[0,1].map(t=>({t,a:{x:(t?LW-270:270)*SCL,y:500*SCL},b:{x:(t?LW-650:650)*SCL,y:330*SCL},r:24*SCL}));
+function cpWarp(p,dt){if(p.dead>0){p.wIn=false;return}p.wcd=Math.max(0,(p.wcd||0)-dt);const W2=WARP[p.team];let on=null,to=null;
+ for(const [A,B] of [[W2.a,W2.b],[W2.b,W2.a]])if(Math.hypot(p.x-A.x,p.y-A.y)<W2.r){on=A;to=B}
+ const was=p.wIn;p.wIn=!!on;p.wSt=on?(was?(p.wSt||0)+dt:0):0;if(!on||p.wcd>0||(was&&p.wSt<1.5))return;
+ if(p.carry){if(p.src&&!(p.nt>performance.now())){p.nt=performance.now()+1800;KF.push({t:2.5,s:tx("warpPrin"),src:p.src})}return}
+ pulses.push({x:p.x,y:p.y,life:.6,max:.6,r:90,col:hx(p.team)});p.x=to.x+(Math.random()-.5)*20;p.y=to.y+(Math.random()-.5)*20;p.lx=undefined;p.nvP=null;p.nvN=0;p.kx=p.ky=0;p.wcd=1;p.wSt=0;p.wIn=true;
+ pulses.push({x:p.x,y:p.y,life:.6,max:.6,r:90,col:hx(p.team)});sfx("lift");if(p.src){rumble(p,90,.3,.4);if(cpTipOnce("warp"))KF.push({t:3.5,s:tx("warpTipp"),src:p.src})}}
 const CSP=[[600,280],[LW-600,280],[620,650],[LW-620,650],[870,330],[LW-870,330]].map(a=>({x:a[0]*SCL,y:a[1]*SCL,c:null,t:0}));
 cpNavBuild();
 function wallPush(p,r){const cx=Math.max(r[0],Math.min(r[1],p.x)),cy=Math.max(r[2],Math.min(r[3],p.y)),dx=p.x-cx,dy=p.y-cy,d=Math.hypot(dx,dy);
@@ -351,7 +360,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25c';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25d';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -570,7 +579,7 @@ function step(dt){
   p.x=Math.max(16,Math.min(WW-16,p.x));p.y=Math.max(16,Math.min(HH-16,p.y));
   for(const G of GATE)if(G.t!=p.team&&G.hp>0)wallPush(p,G.r);
   {const o=TW,dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(TW.owner!=p.team&&d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}
-  for(const o of OBS.concat(BLD,ORE)){const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}cpTerr(p);
+  for(const o of OBS.concat(BLD,ORE)){const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy),m=o.r+16;if(d<m){p.x=d>.01?o.x+dx/d*m:o.x+m;p.y=d>.01?o.y+dy/d*m:o.y}}cpTerr(p);cpWarp(p,dt);
   p.cd-=dt;p.sw-=dt;p.ct-=dt;p.spin-=dt;p.bw=Math.max(0,(p.bw||0)-dt);p.inv=Math.max(0,(p.inv||0)-dt);if(p.zw>0){p.zw-=dt;if(p.zw<=0)zauber(p,p.zs)}else if(p.bc){p.zt-=dt;if(p.zt<=0)zauberEnd(p)}else if(p.zh&&p.zc<1){p.zc=Math.min(1,p.zc+dt/30);if(p.zc>=1&&p.src){sfx('score');rumble(p,100,.3,.5)}}if(p.cls>=6){const o=p.mp||0;p.mp=Math.min(1,o+dt/30);if(o<1&&p.mp>=1){sfx('score');rumble(p,100,.3,.5)}}p.pk=(p.pk||0)-dt;
   const rel=p.prev&&!inp.a&&!p.cx&&!p.carry&&p.dash<=0,big=rel&&p.ch>=.8,tap=rel&&!big,och=p.ch;
   if(inp.a&&!p.carry&&!p.cx&&p.dash<=0&&!(p.gst>0))p.ch=Math.min(1.4,p.ch+dt);else p.ch=0;
@@ -873,7 +882,8 @@ const MFALL=new THREE.MeshBasicMaterial({map:FTX});
 for(const [x,w,y0,y1,z] of [[760,96,0,56,-19],[1160,96,0,56,-19],[960,344,-280,.5,1011]]){const g=new THREE.PlaneGeometry(w,y1-y0),uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*w/40,uv.getY(i)*(y1-y0)/60);const m=new THREE.Mesh(g,MFALL);m.position.set(x-LW/2,(y0+y1)/2,z-LH/2);LG.add(m)}
 const MFOAM=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,depthWrite:false}),cpFoam=[];
 for(const [x,y,r] of [[760,-6,30],[1160,-6,30],[738,8,16],[784,6,15],[1136,8,16],[1182,6,15]]){const m=new THREE.Mesh(cpGeo('foam',()=>new THREE.CircleGeometry(1,16)),MFOAM);m.rotation.x=-Math.PI/2;m.position.set(x-LW/2,1,y-LH/2);m.scale.setScalar(r);m.userData.r=r;LG.add(m);cpFoam.push(m)}
-function cpMapAnim(now){const s=now/1000;WTX.offset.set(s*.012,s*.006);FTX.offset.y=s*1.3;cpFoam.forEach((m,i)=>m.scale.setScalar(m.userData.r*(1+.12*Math.sin(s*5+i*1.7))))}
+function cpMapAnim(now){const s=now/1000;WTX.offset.set(s*.012,s*.006);FTX.offset.y=s*1.3;cpFoam.forEach((m,i)=>m.scale.setScalar(m.userData.r*(1+.12*Math.sin(s*5+i*1.7))));
+ cpWarpM.forEach((w,i)=>{const u=(s*.8+i*.25)%1;w.r.position.y=3+u*22;w.r.material.opacity=1-u;w.r.material.transparent=true;w.r.scale.setScalar(1-u*.3);w.o.position.y=6+3*Math.sin(s*3+i);w.o.rotation.z=s*2;w.d.material.opacity=.7+.2*Math.sin(s*4+i)})}
 // Felsen: oben (Kerben für die Wasserfälle), links/rechts, Klippe unten (schwebende Insel)
 const RTX=cpTexC(256,256,(k,w)=>{k.fillStyle="#9b978c";k.fillRect(0,0,w,w);for(let i=0;i<60;i++){const x=cpRnd()*w,y=cpRnd()*w,r=14+cpRnd()*20,a=cpRnd()*3,c=["#c4c0b4","#b3afa3","#d2cec2"][i%3];cpWrap(w,w,(ox,oy)=>{k.fillStyle=c;k.strokeStyle='#45423e';k.lineWidth=3;k.beginPath();k.ellipse(x+ox,y+oy,r,r*.7,a,0,7);k.fill();k.stroke()})}},1/40);
 const MROCK=cpLM(RTX),MGRS=cpMat(0x4f8f34);
@@ -931,6 +941,12 @@ cpInst(new THREE.CylinderGeometry(1,1.12,1,14),cpMat(0xf2e4c8),cpTowL.map(a=>[a[
 cpInst(new THREE.CylinderGeometry(1.1,1.1,1,14),new THREE.MeshLambertMaterial({color:0xffffff}),cpTowL.map(a=>[a[0],a[1]+a[3]-2,a[2],16,4,16,hx(a[4])]));
 cpInst(new THREE.ConeGeometry(1,1,14),new THREE.MeshLambertMaterial({color:0xffffff}),cpTowL.map(a=>[a[0],a[1]+a[3]+9,a[2],21,19,21,hx(a[4])]),1.3);
 cpTowL.forEach((a,k)=>{if(![0,4,8].includes(k%9))return;const top=a[1]+a[3]+18;mesh(cpGeo('fp',()=>new THREE.CylinderGeometry(.8,.8,30,6)),0x6b4a2a,a[0],top+11,a[2],LG);const bg=cpGeo('fb',()=>{const g=new THREE.BoxGeometry(20,11,.8);g.translate(10,0,0);return g}),f=mesh(bg,hx(a[4]),a[0],top+20,a[2],LG);f.castShadow=false;cpFLG.push(f)});
+// Teleporter-Plattformen (Teamfarbe, Ring schwebt)
+const cpWarpM=[];for(const W2 of WARP)for(const A of [W2.a,W2.b]){const gp=new THREE.Group();gp.position.set(wxl(A.x/SCL),dep(A.x,A.y)/SCL,wzl(A.y/SCL));LG.add(gp);
+ cpPart(gp,cpGeo("wb",()=>new THREE.CylinderGeometry(24,26,2.4,24)),0xb9aea0,0,1.2,0,{ol:.8});
+ const d=new THREE.Mesh(cpGeo("wd",()=>new THREE.CircleGeometry(19,24)),new THREE.MeshBasicMaterial({color:hx(W2.t),transparent:true,opacity:.85}));d.rotation.x=-Math.PI/2;d.position.y=2.5;gp.add(d);
+ const r=new THREE.Mesh(cpGeo("wr",()=>new THREE.TorusGeometry(16,1.3,6,28)),new THREE.MeshBasicMaterial({color:0xffffff}));r.rotation.x=Math.PI/2;gp.add(r);
+ const o=new THREE.Mesh(cpGeo("wo",()=>new THREE.TorusGeometry(10,1,6,20)),new THREE.MeshBasicMaterial({color:hx(W2.t)}));o.rotation.x=Math.PI/2;gp.add(o);cpWarpM.push({d,r,o})}
 // Deko-Bäume auf den Felsen (Positionen für buildMap: [x,z,y] lokal)
 const cpTP=[];
 for(let i=0;i<80;i++){const x=-300+cpRnd()*2520,y=-280+cpRnd()*300;if(y>-50&&((x>690&&x<830)||(x>1090&&x<1230)))continue;cpTP.push([x-LW/2,y-LH/2,56])}
@@ -1099,6 +1115,20 @@ function hud(){
   const w2=50*(1+.05*f);g.drawImage(HUDP[t],bx+43-w2/2,62-w2/2,w2,w2)}
  if(!menu&&over<0){if(cpSV){for(const t of [0,1]){const lp=players.find(p=>p.src&&p.team==t&&p.dead<=0)||players.find(p=>p.src&&p.team==t);if(lp)hPanel(lp,t)}}
   else{const lp=players.find(p=>p.src&&p.dead<=0)||players.find(p=>p.src);if(lp)hPanel(lp,-1)}}}
+// Minikarte: Vollbild unten mittig, Splitscreen oben mittig unter den Wappen; nur wenn ein Mensch spielt. Bild der Karte einmalig aus CPT (cpMMC)
+let cpMMC=null;
+function cpMMBuild(){const c=document.createElement("canvas"),w=300,h=150;c.width=w;c.height=h;const k=c.getContext("2d");k.scale(w/LW,h/LH);k.fillStyle="#77b84c";k.fillRect(0,0,LW,LH);
+ for(const o of CPT){const a=o.a;k.fillStyle=o.f==2?"#3d8fd0":o.ax?"#e8d3a2":o.h==140||o.h==60?"#8d8a80":o.h==3?"#b07a45":o.h==0?"#c9a39a":o.h==40?"#e2c68c":o.h==80?"#f0dcaa":o.h==-28?"#6b4f68":"#f2e4c8";
+  k.beginPath();if(o.s==0)k.rect(a[0],a[2],a[1]-a[0],a[3]-a[2]);else if(o.s==1)k.arc(a[0],a[1],a[2],0,7);else a.forEach((q,i)=>i?k.lineTo(q[0],q[1]):k.moveTo(q[0],q[1]));k.fill()}
+ cpMMC=c}
+function cpMiniMap(){if(menu||over>=0||!players.some(p=>p.src))return;if(!cpMMC)cpMMBuild();
+ const w=150,h=75,x=W/2-w/2,y=cpSV?98:H-h-10,s=w/WW,dot=(px,py,r,f,st,lw)=>{g.beginPath();g.arc(x+px*s,y+py*s,r,0,7);g.fillStyle=f;g.fill();if(st){g.lineWidth=lw||1.5;g.strokeStyle=st;g.stroke()}};
+ g.save();g.globalAlpha=.9;hrr(x-4,y-4,w+8,h+8,8);g.fillStyle="#2a1610";g.fill();g.drawImage(cpMMC,x,y,w,h);g.globalAlpha=1;
+ for(const W2 of WARP)for(const A of [W2.a,W2.b])dot(A.x,A.y,2.6,COL[W2.t],"#fff",1);
+ dot(TW.x,TW.y,4,TW.owner<0?"#ccc":COL[TW.owner],"#2a1610");
+ for(const t of [0,1])dot(prin[t].x,prin[t].y,4.5,"#ff9fc2",COL[t],2);
+ for(const p of players)if(p.dead<=0)dot(p.x,p.y,p.src?3.6:2.4,COL[p.team],p.src?"#fff":null);
+ g.restore()}
 // Spieler-Anzeige (Herzen, Spezial, Rang, Rohstoffe): t<0 Vollbild oben mittig in einer Zeile; Splitscreen: zweizeilig in der äußeren Ecke der Hälfte t
 function hPanel(lp,t){const sv=t>=0,n=CLS[lp.cls].hp,hs=sv?20:28,w=n*hs+(sv?18:22),sw=84,rw=114,e0=t==1?W+DX-14:14-DX;let x,lx,rx,y2=0;
  if(!sv){x=W/2-w/2;lx=x-8-sw;rx=x+w+8}else{x=t?e0-w:e0;if(t){rx=e0-rw;lx=rx-8-sw}else{lx=e0;rx=lx+sw+8}y2=lp.cls>=6?60:42}
@@ -1120,9 +1150,9 @@ function draw(){
  {const s=cpSplitOn();if(s!==cpSV){cpSV=s;cpNeedR=true}}
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,SW,H);g.setTransform(1,0,0,1,DX,0);if(!paused||cpNeedR){cpNeedR=false;render3D()}
  if(cpSV){for(const t of [0,1]){cpView(t);g.save();g.beginPath();g.rect(VX0,0,VW,H);g.clip();wLab(t);g.restore()}cpView(-1);g.fillStyle='#2a1610';g.fillRect(W/2-2,0,4,H)}else{cpView(-1);wLab(-1)}
- hud();
- if(!menu&&over<0)KF.forEach((e,i)=>{g.globalAlpha=Math.min(1,e.t);cpHint(e.s,W/2,(cpSV?112:66)+i*17,14,'#3a2340','center',e.src);g.globalAlpha=1});
- if(!menu&&!paused&&cdown<=0&&players.some(p=>p.src&&p.cls==5)&&cpTip('hat',8))txt(tx('hutTipp'),W/2,H-18,17,'#3a2340');
+ hud();cpMiniMap();
+ if(!menu&&over<0)KF.forEach((e,i)=>{g.globalAlpha=Math.min(1,e.t);cpHint(e.s,W/2,(cpSV?186:66)+i*17,14,'#3a2340','center',e.src);g.globalAlpha=1});
+ if(!menu&&!paused&&cdown<=0&&players.some(p=>p.src&&p.cls==5)&&cpTip('hat',8))txt(tx("hutTipp"),W/2,cpSV?H-18:H-100,17,'#3a2340');
  if(menu){g.fillStyle='#000a';g.fillRect(-DX,0,SW,H);
   const now=performance.now();
   txtO(tx('titel'),W/2,62,52,'#fff');txt(CPVER,14-DX,H-12,11,'#ffe9cf99','left');
