@@ -148,7 +148,7 @@ function chargeAtk(p){const c=p.cls,T=p.team;p.cd=1;p.sw=.3;p.ct=0;rumble(p,220,
   gateHit(p,80,2)}
  else if(c==1&&p.up){p.cd=1.3;for(let i=-4;i<=4;i++)shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,...spread(p,i*.1+(Math.random()-.5)*.04,540),t:T,o:p.i,k:0,sg:1,dm:.75,life:.34});shake=Math.max(shake,9);sfx('hit')}
  else if(c==1){p.cd=.8;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*680,vy:p.fy*680,t:T,o:p.i,k:0,pw:1,life:1.2,hit:[]});shake=Math.max(shake,3);sfx('swing')}
- else if(c==2){p.cd=1.6;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*210,vy:p.fy*210,t:T,o:p.i,k:1,big:1,ice:p.up?1:0,life:2.2});sfx('feed')}
+ else if(c==2){p.cd=1.6;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*210,vy:p.fy*210,t:T,o:p.i,k:1,big:1,ice:p.up?1:0,life:2.2,tg:cpHom(p),hw:1.7});sfx('feed')}
  else if(c==3&&p.up){p.cd=2;pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:150,col:0x7a3fb8});sfx('feed');for(const q of players){if(q.team==T||q.dead>0||q.dash>0)continue;if(Math.hypot(q.x-p.x,q.y-p.y)<150){q.pz=Math.max(q.pz||0,7);q.pzb=p.i;fx(q.x,q.y,45,8,5,80,70)}}}
  else if(c==3){p.cd=2;pulses.push({x:p.x,y:p.y,life:.5,max:.5,r:165,col:0xfff2a8});sfx('pick');
   for(const q of players)if(q!==p&&q.team==T&&q.dead<=0&&Math.hypot(q.x-p.x,q.y-p.y)<165){q.hp=Math.min(CLS[q.cls].hp,q.hp+4);q.pz=0;q.shd=Math.max(q.shd||0,1)}}
@@ -171,7 +171,13 @@ function upgradeHit(p,w,rg){const T=p.team;for(const b of BLD){if(b.t!=T||b.k>4|
  return true}return false}
 function spread(p,a,sp){const c0=Math.cos(a),s0=Math.sin(a);return{vx:(p.fx*c0-p.fy*s0)*sp,vy:(p.fx*s0+p.fy*c0)*sp}}
 // Zielhilfe (nur Menschen, nicht beim Anvisieren): steht ein Gegner ungefähr in Blickrichtung (cos>cs) und in Reichweite rg, dreht sich die Figur vor dem Angriff zu ihm
-function cpAim(p,rg,cs){if(!p.src||p.lt)return;let b=null,bs=-9;for(const q of players){if(q.team==p.team||q.dead>0||q.inv>0)continue;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy);if(d>rg||d<1)continue;const c=(dx*p.fx+dy*p.fy)/d;if(c<cs)continue;const s=c-d/rg*.35;if(s>bs){bs=s;b=q}}if(b){const d=Math.hypot(b.x-p.x,b.y-p.y);p.fx=(b.x-p.x)/d;p.fy=(b.y-p.y)/d}}
+function cpBest(p,rg,cs){let b=null,bs=-9;for(const q of players){if(q.team==p.team||q.dead>0||q.inv>0)continue;const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy);if(d>rg||d<1)continue;const c=(dx*p.fx+dy*p.fy)/d;if(c<cs)continue;const s=c-d/rg*.35;if(s>bs){bs=s;b=q}}return b}
+function cpAim(p,rg,cs){if(!p.src||p.lt)return;const b=cpBest(p,rg,cs);if(b){const d=Math.hypot(b.x-p.x,b.y-p.y);p.fx=(b.x-p.x)/d;p.fy=(b.y-p.y)/d}}
+// Lenkgeschosse (langsame Zauber: Magier-Kugeln, Priester-Fluch): Ziel beim Abschuss = angepeiltes Ziel oder Gegner im Blickkegel (Menschen und Bots).
+// cpSteer dreht die Kugel begrenzt (s.hw rad/s) zum Ziel; Ziel verloren bei Sprung (jz>16), Unsichtbarkeit, Tod, >700 Abstand oder wenn vorbeigeflogen.
+function cpHom(p){const q=p.lt&&p.lt.team!=p.team&&!(p.lt.dead>0)&&!(p.lt.inv>0)?p.lt:cpBest(p,480,.7);return q&&!(q.jz>16)?q:null}
+function cpSteer(s,dt){const q=s.tg;if(q.dead>0||q.inv>0||q.jz>16){s.tg=null;return}const dx=q.x-s.x,dy=q.y-s.y,d=Math.hypot(dx,dy)||1,v=Math.hypot(s.vx,s.vy)||1,c=(dx*s.vx+dy*s.vy)/(d*v);if(c<0||d>700){s.tg=null;return}
+ const m=s.hw*dt,a=Math.max(-m,Math.min(m,Math.atan2((s.vx*dy-s.vy*dx)/(d*v),c))),co=Math.cos(a),si=Math.sin(a),nx=s.vx*co-s.vy*si;s.vy=s.vx*si+s.vy*co;s.vx=nx}
 function cheatUp(only){if(menu)return;const ts=new Set(only!=null?[only]:players.filter(p=>p.src).map(p=>p.team));if(!ts.size)ts.add(0);for(const T of ts){UPG[T]=[1,1,1,1,1];for(const b of BLD)if(b.t==T)b.up=0;KF.push({t:3,s:NAME[T]+': alle Gebäude verbessert!'})}sfx('pick')}
 function gather(p,w,rg){w=w||1;rg=rg||44;if(p.it)return;const nr=(o,rg)=>{const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);return d<o.r+rg&&(dx*p.fx+dy*p.fy)>.2*d};
  for(const o of OBS)if(o.hw>0&&nr(o,rg)){o.dm=(o.dm||0)+w;o.shk=w>1?.5:.3;sfx('hit');fx(o.x,o.y,70,w>1?9:5,1,120,100,500,.5,1.2);if(o.dm>=4&&loot.length<30){o.dm=0;o.hw--;if(o.hw<=0)o.hr=10;spawnLoot(0,o,p);sfx('pick')}else if(o.dm>=4)o.dm=3;return}
@@ -179,8 +185,8 @@ function gather(p,w,rg){w=w||1;rg=rg||44;if(p.it)return;const nr=(o,rg)=>{const 
 function useSkill(p){const c=p.cls,T=p.team;
  if(c==1&&p.up){p.cd=1.1;p.sw=.15;for(let i=-2;i<=2;i++)shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,...spread(p,i*.11+(Math.random()-.5)*.05,520),t:T,o:p.i,k:0,sg:1,dm:.5,life:.3});shake=Math.max(shake,4);sfx('hit')}
  else if(c==1){p.cd=.5;p.sw=.12;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*440,vy:p.fy*440,t:T,o:p.i,k:0,life:.8});sfx('swing')}
- else if(c==2){p.cd=1.1;p.sw=.2;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*250,vy:p.fy*250,t:T,o:p.i,k:1,ice:p.up?1:0,life:1.6});sfx('feed')}
- else if(c==3&&p.up){p.cd=.9;p.sw=.2;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*320,vy:p.fy*320,t:T,o:p.i,k:0,pz:1,life:1.1});sfx('feed')}
+ else if(c==2){p.cd=1.1;p.sw=.2;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*250,vy:p.fy*250,t:T,o:p.i,k:1,ice:p.up?1:0,life:1.6,tg:cpHom(p),hw:2.4});sfx('feed')}
+ else if(c==3&&p.up){p.cd=.9;p.sw=.2;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*320,vy:p.fy*320,t:T,o:p.i,k:0,pz:1,life:1.1,tg:cpHom(p),hw:2.2});sfx('feed')}
  else if(c==3){p.cd=1.4;p.sw=.2;pulses.push({x:p.x,y:p.y,life:.4,max:.4,r:95,col:0xfff2a8});sfx('pick');
   for(const q of players)if(q!==p&&q.team==T&&q.dead<=0&&Math.hypot(q.x-p.x,q.y-p.y)<95){q.hp=Math.min(CLS[q.cls].hp,q.hp+2);q.pz=0}}
  else if(c==4&&p.up){p.cd=1;p.sw=.2;shots.push({x:p.x+p.fx*18,y:p.y+p.fy*18,vx:p.fx*280,vy:p.fy*280,t:T,o:p.i,k:1,bm:1,life:.75});sfx('feed')}
@@ -365,7 +371,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-25j';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-26';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -549,7 +555,7 @@ function step(dt){
  for(const q of players){if(q.dead>0&&!q.wd){q.wd=true;const Q=q.bc||q;hatDrops.push({x:q.x,y:q.y,cls:Q.cls,up:Q.up?1:0,team:q.team,t:0,life:Q.cls<5?14:4,rot:Math.atan2(q.fx,q.fy)});if(hatDrops.length>24)hatDrops.shift();q.de=(q.de||0)+1;const k=players[q.lh];if(k&&k.team!=q.team){k.ki=(k.ki||0)+1;KF.push({t:3,s:NAME[k.team]+' '+cn(k)+' besiegt '+NAME[q.team]+' '+cn(q)});if(KF.length>3)KF.shift()}q.lh=null}if(q.dead<=0)q.wd=false}
  for(let i=KF.length-1;i>=0;i--){KF[i].t-=dt;if(KF[i].t<=0)KF.splice(i,1)}for(const q of players)if(q.pz>0&&q.dead<=0){q.pz-=dt;q.pzt=(q.pzt||0)-dt;if(q.pzt<=0){q.pzt=1;const sh=q.shd;q.shd=0;hurt(q,.5,0,0,0,0,q.pzb);q.shd=sh;fx(q.x,q.y,45,6,5,60,60)}else if(Math.random()<dt*10)fx(q.x,q.y,50,1,5,40,50)}for(const b of BLD)b.shk=Math.max(0,(b.shk||0)-dt);for(const o of OBS){o.shk=Math.max(0,(o.shk||0)-dt);if(o.hw<=0){o.hr-=dt;if(o.hr<=0){o.hw=1;o.dm=0}}}for(const o of ORE){o.shk=Math.max(0,(o.shk||0)-dt);if(o.n<=0){o.hr-=dt;if(o.hr<=0){o.n=3;o.dm=0}}}for(const G of GATE)if(G.hp<=0){G.down-=dt;if(G.down<=0)G.hp=GHP}for(const l of loot){if(l.t>0)l.t-=dt;if(l.by){l.x=l.by.x;l.y=l.by.y}else if(l.z>0||l.vz>0){l.vz-=900*dt;l.z=Math.max(0,l.z+l.vz*dt);if(l.z<=0)l.vz=0}}
  for(let k=pulses.length-1;k>=0;k--){pulses[k].life-=dt;if(pulses[k].life<=0)pulses.splice(k,1)}
- for(let k=shots.length-1;k>=0;k--){const s=shots[k];s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;let dd=s.life<=0||s.x<0||s.x>WW||s.y<0||s.y>HH;
+ for(let k=shots.length-1;k>=0;k--){const s=shots[k];if(s.tg)cpSteer(s,dt);s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;let dd=s.life<=0||s.x<0||s.x>WW||s.y<0||s.y>HH;
   if(!dd){if(s.hz===undefined)s.hz=dep(s.x,s.y);const hh=dep(s.x,s.y);if(cpF==1||hh>s.hz+30)dd=true}
   if(!dd)for(const o of OBS)if(Math.hypot(s.x-o.x,s.y-o.y)<o.r)dd=true;
   if(!dd&&TW.owner!=s.t&&Math.hypot(s.x-TW.x,s.y-TW.y)<TW.r)dd=true;
