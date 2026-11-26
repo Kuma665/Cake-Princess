@@ -38,7 +38,7 @@ const cpErrEl=document.getElementById('err');let cpErrT=0;
 function cpLine(e){const m=((e&&e.stack)||'').match(/:(\d+):\d+\)?\s*(\n|$)/);return m?' (Zeile '+m[1]+')':''}
 // Alle sichtbaren Texte (Deutsch) an einer Stelle, für spätere Übersetzung. Werte mit {a} {b} {y} … sind Tastenplatzhalter, Funktionen bekommen Werte.
 const TX={
- titel:'Cake Princess',ko:'K.O.!',spezBereit:'Spezial bereit!',hilfe:'Hilfe!',ninjaUnsicht:'Ninja (unsichtbar)',spezial:'Spezial: {y}',ablegen:'{b}: ablegen',essen:'Ablegen halten: essen',bau:'Bau: 3 Holz',prinzessin:'Prinzessin',aufheben:'{b}: aufheben',thron:'Thron',kerker:'Kerker ▼',zauberhut:'Zauberhut',
+ titel:'Cake Princess',ko:'K.O.!',entf:n=>'Prinzessin von '+n+' entführt!',rettet:(n,a,b)=>n+' rettet die Prinzessin! '+a+' : '+b,fastSieg:n=>n+': noch 1 Punkt zum Sieg!',beide:'Nächster Punkt entscheidet!',spezBereit:'Spezial bereit!',hilfe:'Hilfe!',ninjaUnsicht:'Ninja (unsichtbar)',spezial:'Spezial: {y}',ablegen:'{b}: ablegen',essen:'Ablegen halten: essen',bau:'Bau: 3 Holz',prinzessin:'Prinzessin',aufheben:'{b}: aufheben',thron:'Thron',kerker:'Kerker ▼',zauberhut:'Zauberhut',
  verbessern:'Draufschlagen: verbessern (6 Holz, 3 Erz)',hutTipp:'Hol dir einen Hut in deiner Burg: Krieger, Magier, Priester, Jäger oder Arbeiter!',
  zauberhutKF:'Zauberhut! {y} = Kraft wählen',keinGegner:'Kein Gegner in Reichweite',verbKosten:'Verbessern kostet 6 Holz + 3 Erz',
  spielerN:n=>'Spieler '+n,spielerH:'Spieler',
@@ -84,6 +84,10 @@ const UN=['Glefenkrieger','Schrotjäger','Eismagier','Dunkelpriester','Bombenarb
 let loot=[],hatDrops=[],players,cakes,prin,score,spawnT,over,overT,t0=0,traps=[],hitStop=0,shake=0,shots=[],pulses=[],menu=true,cdown=0,DIFF=cpS.diff,paused=false,pz=false;
 const CLS=[{n:'Krieger',hp:6,sp:198,hat:0xb8b8c8,hs:1},{n:'Jäger',hp:4,sp:222,hat:0x3da35d,hs:1},{n:'Magier',hp:4,sp:192,hat:0x8a4fd1,hs:1.7},{n:'Priester',hp:4,sp:204,hat:0xffffff,hs:.6},{n:'Arbeiter',hp:4,sp:210,hat:0xf2c230,hs:.8},{n:'Bürger',hp:3,sp:204,hat:0xcccccc,hs:.5},{n:'Pirat',hp:5,sp:200,hat:0x1a1a22,hs:1},{n:'Ninja',hp:4,sp:240,hat:0x8a1f2b,hs:1},{n:'Riese',hp:9,sp:168,hat:0x3a2a1c,hs:1}];
 // Treffer-Feedback: Aufblitzen (p.hf), Schadenszahlen DN, kurzer Hitstop wenn ein Mensch beteiligt ist
+// Grosse Ansage in der Bildmitte (MSG): Text in Teamfarbe, optionale Unterzeile s2
+function cpAnn(s,col,s2){MSG={t:2.8,m:2.8,s,col:col||'#fff',s2:s2||''}}
+// Musik-Tempo: schneller, sobald ein Team nur noch 1 Punkt zum Sieg braucht
+function cpMT(){return !menu&&over<0&&score&&Math.max(score[0],score[1])>=WIN-1?165:215}
 const DN=[],KBW=[.85,1.05,1.15,1.1,.95,1.2,.9,1.25,.35]; // Rueckstoss-Faktor je Klasse (Riese schwer, Ninja leicht)
 function cpHit(q,dmg,ux,uy,by){if(!(dmg>0))return;q.hf=.16;const hm=q.src||(by!=null&&players[by]&&players[by].src);if(hm)hitStop=Math.max(hitStop,Math.min(.07,.025+.015*dmg));if(DN.length<24)DN.push({x:q.x,y:q.y,ux:ux||0,uy:uy||0,t:0,v:Math.min(dmg,9),k:q.hp<=0?2:q.src?1:0});if(q.hp<=0){q.dt0=0;q.hdx=ux||0;q.hdy=uy||0}if(q.hp<=0&&hm){hitStop=Math.max(hitStop,.12);shake=Math.max(shake,9)}}
 // K.O.-Flug: Weite nach Anteil u (0..1) der Flugzeit .55 s (p.dt0 = Zeit seit K.O.)
@@ -378,7 +382,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-26e';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-26f';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -419,10 +423,10 @@ function tone(f,d,type,v,f2,delay,bus){if(!AC)return;const t=AC.currentTime+(del
  gn.gain.setValueAtTime(v||.1,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);
  o.connect(gn);gn.connect(bus||cpFxG||AC.destination);o.start(t);o.stop(t+d+.02)}
 const MEL=[0,4,7,4,5,9,12,9,7,11,14,11,12,null,7,null,0,4,7,12,9,5,9,null,7,2,5,7,0,null,null,null],BAS=[-24,-24,-19,-19,-17,-17,-19,-19];
-function startMusic(){setInterval(()=>{if(!cpS.mv||!AC)return;const n=MEL[mstep%32];
+function startMusic(){const f=()=>{setTimeout(f,cpMT());if(!cpS.mv||!AC)return;const n=MEL[mstep%32];if(cpMT()<200&&mstep%2==0)noise(.04,.035,'highpass',6000,0,0,cpMuG);
  if(n!==null)tone(261.63*Math.pow(2,n/12),.2,'triangle',.05,0,0,cpMuG);
  if(mstep%4==0)tone(261.63*Math.pow(2,BAS[(mstep/4|0)%8]/12),.45,'sine',.09,0,0,cpMuG);
- mstep++},215)}
+ mstep++};f()}
 // Rauschen (gemeinsamer Puffer NB) fuer Schlag-/Schwung-Toene
 let NB=null;function noise(d,v,typ,f1,f2,delay,bus,q){if(!AC)return;if(!NB){NB=AC.createBuffer(1,AC.sampleRate*.5|0,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),gn=AC.createGain();s.buffer=NB;f.type=typ||'lowpass';f.Q.value=q||1;f.frequency.setValueAtTime(f1,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+d);gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(gn);gn.connect(bus||cpFxG||AC.destination);s.start(t);s.stop(t+d+.02)}
 const SFT={};
@@ -432,6 +436,7 @@ function sfx(k){{const nw=performance.now();if(SFT[k]&&nw-SFT[k]<(k=='hit'?55:35
  else if(k=='pick')tone(600,.1,'sine',.12,1000);
  else if(k=='feed'){tone(500,.25,'sine',.12,200);tone(250,.2,'triangle',.1,120,.1)}
  else if(k=='lift')tone(300,.2,'triangle',.12,600);else if(k=='cry'){tone(900,.12,'sine',.07,1400);tone(1200,.14,'sine',.06,800,.13)}
+ else if(k=='alarm'){tone(880,.16,'square',.06,620);tone(880,.16,'square',.06,620,.2);tone(880,.16,'square',.06,620,.4)}
  else if(k=='die'){tone(240,.38,'sawtooth',.08,40);noise(.32,.13,'lowpass',1600,140);tone(75,.3,'sine',.22,30)}
  else if(k=='score')[0,4,7,12].forEach((n,i)=>tone(523*Math.pow(2,n/12),.25,'square',.08,0,i*.1));
  else if(k=='win')[0,4,7,12,16,19,24].forEach((n,i)=>tone(392*Math.pow(2,n/12),.35,'square',.08,0,i*.12))}
@@ -554,7 +559,7 @@ function step(dt){
   if(players.some(q=>q.src)&&players.every(q=>!q.src||q.ready)){menu=false;cdown=3.2;players.forEach(respawn);sfx('score')}
   return}
  if(cdown>0){cdown-=dt;return}
- spawnT-=dt;if(MSG)MSG.t-=dt;for(let i=splats.length-1;i>=0;i--){splats[i].t-=dt;if(splats[i].t<=0)splats.splice(i,1)}for(const h of HATS)if(h.cd>0)h.cd-=dt;for(const h of MH)if(h.cd>0)h.cd-=dt;for(let k=hatDrops.length-1;k>=0;k--){hatDrops[k].t+=dt;if(hatDrops[k].t>=hatDrops[k].life)hatDrops.splice(k,1)}
+ spawnT-=dt;if(MSG)MSG.t-=dt;for(const q of prin)if(q.ann>0)q.ann-=dt;for(let i=splats.length-1;i>=0;i--){splats[i].t-=dt;if(splats[i].t<=0)splats.splice(i,1)}for(const h of HATS)if(h.cd>0)h.cd-=dt;for(const h of MH)if(h.cd>0)h.cd-=dt;for(let k=hatDrops.length-1;k>=0;k--){hatDrops[k].t+=dt;if(hatDrops[k].t>=hatDrops[k].life)hatDrops.splice(k,1)}
  {const n=[0,0];for(const q of players)if(q.dead<=0&&Math.hypot(q.x-TW.x,q.y-TW.y)<TW.z)n[q.team]++;
   const net=n[1]-n[0];
   if(net!=0)TW.p=Math.max(-1,Math.min(1,TW.p+Math.sign(net)*Math.min(3,Math.abs(net))*.12*dt));
@@ -647,12 +652,12 @@ function step(dt){
   // feed enemy princess
   if(p.cake&&!op.by&&Math.hypot(op.x-p.x,op.y-p.y)<34){op.f=Math.min(5,op.f+1);op.dk=0;p.cake=false;p.fd=(p.fd||0)+1;sfx('feed');fx(op.x,op.y,45,12,0,170,150,500,.7,1.3);fx(op.x,op.y,45,8,3,150,130,500,.7,1.2);fx(op.x,op.y,45,6,4,150,130,500,.7,1.2)}
   // lift enemy princess
-  if(!p.cake&&!p.carry&&!p.it&&p.nl<=0&&(!p.src||dpr)&&!ep.by&&Math.hypot(ep.x-p.x,ep.y-p.y)<30){ep.by=p;p.carry=ep;sfx('lift')}
+  if(!p.cake&&!p.carry&&!p.it&&p.nl<=0&&(!p.src||dpr)&&!ep.by&&Math.hypot(ep.x-p.x,ep.y-p.y)<30){ep.by=p;p.carry=ep;sfx('lift');if(!(ep.ann>0)){ep.ann=12;cpAnn(tx('entf',NAME[ep.t]),COL[ep.t]);sfx('alarm')}}
   // return own dropped princess
   if(!op.by&&(op.x!=PH[op.t].x||op.y!=PH[op.t].y)&&Math.hypot(op.x-p.x,op.y-p.y)<30){op.x=PH[op.t].x;op.y=PH[op.t].y}
   // score
   if(p.carry){const h=THR[p.team];
-   if(Math.hypot(p.x-h.x,p.y-h.y)<70){const c=p.carry;score[p.team]++;p.cap=(p.cap||0)+1;sfx('score');MSG={t:2.8,s:NAME[p.team]+' rettet die Prinzessin! '+score[0]+' : '+score[1]};c.by=null;c.f=0;c.x=PH[c.t].x;c.y=PH[c.t].y;p.carry=null;
+   if(Math.hypot(p.x-h.x,p.y-h.y)<70){const c=p.carry;score[p.team]++;p.cap=(p.cap||0)+1;sfx('score');cpAnn(tx('rettet',NAME[p.team],score[0],score[1]),COL[p.team],score[0]>=WIN||score[1]>=WIN?'':score[0]==WIN-1&&score[1]==WIN-1?tx('beide'):score[p.team]==WIN-1?tx('fastSieg',NAME[p.team]):'');c.by=null;c.f=0;c.x=PH[c.t].x;c.y=PH[c.t].y;p.carry=null;
     if(score[p.team]>=WIN){over=p.team;overT=12;sfx('win')}}}
  }
  for(const pr of prin){if(pr.f>0){pr.dk=(pr.dk||0)+dt;if(pr.dk>=14){pr.dk=0;pr.f--;fx(pr.x,pr.y,40,6,0,60,60,200,.5,1.2)}}else pr.dk=0;if(pr.cryT>0)pr.cryT-=dt;if(pr.by){pr.x=pr.by.x;pr.y=pr.by.y-14;pr.cry=(pr.cry||0)-dt;if(pr.cry<=0){pr.cry=2.6;pr.cryT=.9;sfx('cry')}}else pr.cry=0}
@@ -1215,7 +1220,7 @@ function draw(){
   cpItems().forEach((s,i)=>{const L=cpLay(i),y=L.y,on=pmi==i;hrr(330,y,300,L.h,L.h/2);g.fillStyle=on?'#ffd23f':'#fff3e2';g.fill();g.lineWidth=on?6:3;g.strokeStyle='#2a1610';g.stroke();txt((on&&!cpAdj(i)?'▶ ':'')+s,W/2,y+L.h*.68,cpSub?21:23,'#3a2340')});
   if(!cpHelpOn)cpCorner(tx(cpSub?'einstHint':'pauseHint'))}
  if((menu||paused)&&!cpHelpOn){const mx=W+DX-30;g.globalAlpha=.7;circ(mx,28,20,'#3a2340');circ(mx-48,28,20,'#3a2340');g.globalAlpha=1;g.font='22px serif';g.textAlign='center';g.strokeStyle='#ffe9cf';g.lineWidth=2.5;g.lineCap='round';g.beginPath();for(const[sx,sy]of[[-1,-1],[1,-1],[1,1],[-1,1]]){g.moveTo(mx+sx*3,28+sy*8);g.lineTo(mx+sx*8,28+sy*8);g.lineTo(mx+sx*8,28+sy*3)}g.stroke();g.fillText(cpS.mute?'🔇':'🔊',mx-48,36)}
- if(MSG&&MSG.t>0&&!menu&&!paused){g.globalAlpha=Math.min(1,MSG.t*2);txtO(MSG.s,W/2,H/2-70,38,'#fff');g.globalAlpha=1}
+ if(MSG&&MSG.t>0&&!menu&&!paused){const ag=(MSG.m||2.8)-MSG.t,k=ag<.18?1.5-ag/.18*.5:1;g.save();g.globalAlpha=Math.min(1,MSG.t*2);g.translate(W/2,H/2-125);g.scale(k,k);txtO(MSG.s,0,0,38,MSG.col||'#fff');if(MSG.s2)txtO(MSG.s2,0,42,26,'#ffd23f');g.restore()}
  if(over>=0){g.fillStyle='#000c';g.fillRect(-DX,0,SW,H);
   txt(tx('gewinnt',NAME[over]),W/2,90,60,'#fff');
   const sc2=p=>(p.ki||0)*2+(p.cap||0)*5+(p.fd||0);let mv=players[0];for(const p of players)if(sc2(p)>sc2(mv))mv=p;
