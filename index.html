@@ -524,7 +524,7 @@ let cpMuE=null,cpMuV=0;
 function startMusic(){try{cpMuE=new Audio('music.mp3?v=1');cpMuE.loop=true;cpMuE.preload='auto';cpMuE.volume=0;cpMuTick();cpMuPlay()}catch(e){}
  setInterval(cpMuTick,100)}
 function cpMuPlay(){if(cpMuE&&cpMuE.paused&&!document.hidden&&document.hasFocus())cpMuE.play().catch(()=>{})}
-function cpMuTick(){if(!cpMuE)return;const z=cpS.mute?0:cpS.mv*.3*((menu||paused)?.5:1); // .3 = Grundpegel gegenueber den SoundeffektencpMuV+=(z-cpMuV)*(Math.abs(z-cpMuV)<.02?1:.25);cpMuE.volume=Math.max(0,Math.min(1,cpMuV));cpMuE.muted=!!cpS.mute||!cpS.mv;
+function cpMuTick(){if(!cpMuE)return;const z=cpS.mute?0:cpS.mv*.3*((menu||paused)?.5:1);/* .3 = Grundpegel gegenueber den Soundeffekten */cpMuV+=(z-cpMuV)*(Math.abs(z-cpMuV)<.02?1:.25);cpMuE.volume=Math.max(0,Math.min(1,cpMuV));cpMuE.muted=!!cpS.mute||!cpS.mv;
  const r=cpMT()<200?1.08:1;if(cpMuE.playbackRate!=r)cpMuE.playbackRate=r}
 // Rauschen (gemeinsamer Puffer NB) fuer Schlag-/Schwung-Toene
 let NB=null;function noise(d,v,typ,f1,f2,delay,bus,q){if(!AC)return;if(!NB){NB=AC.createBuffer(1,AC.sampleRate*.5|0,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),gn=AC.createGain();s.buffer=NB;f.type=typ||'lowpass';f.Q.value=q||1;f.frequency.setValueAtTime(f1,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+d);gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(gn);gn.connect(bus||cpFxG||AC.destination);s.start(t);s.stop(t+d+.02)}
