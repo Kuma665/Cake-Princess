@@ -54,7 +54,7 @@ const TX={
  helpRows:['Laufen','Angreifen (halten = weiter)','Aufheben · Ablegen · Essen (halten)','Ausweichrolle (Ausdauer)','Fähigkeit 1 · Zauberhut-Form','Blocken (früh = Parade)','Anvisieren (halten)','Ziel wechseln','Pause',"Springen",'Fähigkeit 2','Ultimate (wenn voll)'],
  helpL:[['Ziel und Posten','Rette deine Prinzessin aus dem Gegner-Kerker auf deinen Thron und füttere die gegnerische mit Kuchen (dick = langsamer Träger). 5 Posten: zusammen schneller erobert; dort heilen und Holz/Erz abgeben.'],['Kuchen','Wachsen an hellen Tellern nach. {b} halten = essen (heilt 40 %), kurz tippen = ablegen. Die Prinzessin verliert alle 14 s einen Kuchen.']],
  helpR:[['Klassen und Hüte','Hut in der Burg aufheben ({b}), auch gefallene Hüte. Arbeiter: repariert das Tor, stellt Fallen, sammelt Holz und Erz; schlägt er auf ein Hut-Gebäude (6 Holz, 3 Erz), wird die Klasse fürs ganze Team stärker.'],['Zauberhut','Lila Sockel in jeder Burg. Innerhalb von 3 s mit {y} Kraft wählen: Ninja, Pirat oder Riese. Jede Form hat eigene Fähigkeiten.'],['Kampf','Jede Klasse hat 2 Fähigkeiten (Kreis = lädt) und eine Ultimate, die durch Treffer voll wird. Blocken kostet Ausdauer; kurz vor dem Treffer = Parade, der Gegner taumelt. Feuer + Eis = Dampf, Gefrorene zerspringen.']],
- credits:'Schrift: Baloo 2 (Ek Type, SIL Open Font License, Google Fonts)<br>3D: three.js (MIT-Lizenz)<br>Musik und Soundeffekte: im Spiel selbst erzeugt'};
+ credits:'Schrift: Baloo 2 (Ek Type, SIL Open Font License, Google Fonts)<br>3D: three.js (MIT-Lizenz)<br>Musik: „Playful Medieval War“ von vifotofreesounds (Pixabay, pixabay.com/music/folk-playful-medieval-war-486717)<br>Soundeffekte: im Spiel selbst erzeugt'};
 function tx(k,...a){const v=TX[k];return typeof v=='function'?v(...a):v==null?k:v}
 {const e=document.getElementById('rot');if(e&&e.lastChild)e.lastChild.textContent=TX.dreh;for(const[i,t]of[['helpX',TX.helpClose],['fs',TX.vollbild]]){const b=document.getElementById(i);if(b)b.textContent=t}}
 function cpErr(s){const n=performance.now();if(n-cpErrT<1500)return;cpErrT=n;cpErrEl.textContent=s;cpErrEl.style.display='block';clearTimeout(cpErr.h);cpErr.h=setTimeout(()=>{cpErrEl.style.display='none'},8000)}
@@ -463,7 +463,7 @@ cv.addEventListener('pointermove',e=>{if(e.pointerId!==tc.sid)return;const q=pt(
  tc.cx=q.x;tc.cy=q.y;tc.dx=Math.abs(dx)<8&&Math.abs(dy)<8?0:dx/R;tc.dy=Math.abs(dx)<8&&Math.abs(dy)<8?0:dy/R});
 function tend(e){if(e.pointerId===tc.jid){tc.jid=null;tc.j=false}if(e.pointerId===tc.eid){tc.eid=null;tc.e=false}if(e.pointerId===tc.uid){tc.uid=null;tc.u=false}if(e.pointerId===tc.lid){tc.lid=null;tc.l=false}if(e.pointerId===tc.bid){tc.bid=null;tc.b=false}if(e.pointerId===tc.cid){tc.cid=null;tc.c=false}if(e.pointerId===tc.rid){tc.rid=null;tc.r=false}if(e.pointerId===tc.did){tc.did=null;tc.d=false}if(e.pointerId===tc.sid){tc.sid=null;tc.dx=tc.dy=0}if(e.pointerId===tc.aid){tc.aid=null;tc.a=false}}
 cv.addEventListener('pointerup',tend);cv.addEventListener('pointercancel',tend);
-let AC=null,mstep=0;
+let AC=null;
 // Ton: cpMG = Gesamt (Stumm), darunter cpMuG = Musik (cpS.mv), cpFxG = Soundeffekte (cpS.sv)
 let cpMG=null,cpMuG=null,cpFxG=null;function cpVolApply(){if(!cpMG)return;cpMG.gain.value=cpS.mute?0:1;cpMuG.gain.value=cpS.mv;cpFxG.gain.value=cpS.sv}
 function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();cpMG=AC.createGain();cpMG.connect(AC.destination);cpMuG=AC.createGain();cpMuG.connect(cpMG);cpFxG=AC.createGain();cpFxG.connect(cpMG);cpVolApply();startMusic()}catch(e){}}if(AC&&AC.state=='suspended')AC.resume()}
@@ -478,7 +478,7 @@ function cpKey(src,k){if(!src||src[0]=='p')return cpBtn(k);const i=src=='k1'?0:s
 function cpMode(){return players.some(p=>p.src&&p.src[0]=='p')?'p':players.some(p=>p.src=='t')?'t':players.some(p=>p.src&&p.src[0]=='k')?'k':(navigator.maxTouchPoints>0&&matchMedia('(pointer:coarse)').matches)?'t':'k'}
 function cpML(k){return cpKey({p:'p',t:'t',k:'k1'}[cpMode()],k)}
 addEventListener('gamepadconnected',e=>{cpPadT=cpPT(e.gamepad.id)});
-const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-28';
+const cpHelpEl=document.getElementById('help'),CPVER='v2026-11-28b';
 function cpBtnH(k){const s=CPB[cpPadT][k]||k;if(cpPadT=='ps'&&'abxy'.includes(k)&&k.length==1){const P={a:['#7aa7ff','<path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/>'],b:['#ff7a7a','<circle cx="5" cy="5" r="3"/>'],x:['#ff9fd6','<rect x="2.2" y="2.2" width="5.6" height="5.6"/>'],y:['#6fe3a8','<path d="M5 1.8L8.2 7.6H1.8z"/>']}[k];return '<span class="psg ps"><svg viewBox="0 0 10 10" fill="none" stroke="'+P[0]+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'+P[1]+'</svg></span>'}return '<span class="psg '+cpPadT+' '+(s.length>1?'w ':'')+'k-'+k+'">'+s+'</span>'}
 let cpCred=false;function cpHelpShow(on){cpCred=false;cpHelpOn=on;if(!on){cpHelpEl.style.display='none';return}
  const m=cpMode(),c=m=='p'?0:m=='k'?1:2,B=cpBtnH;cpHelpK=cpPadT+m;
@@ -506,8 +506,8 @@ addEventListener('popstate',()=>{cpHistAdd();if(paused){if(cpHelpOn)cpHelpShow(f
 // Mauszeiger im laufenden Spiel ausblenden, bei Mausbewegung 2 s zeigen
 let cpMouseT=0,cpCurH=false;addEventListener('mousemove',()=>{cpMouseT=performance.now();if(cpCurH){cpCurH=false;document.body.style.cursor=''}});
 setInterval(()=>{const h=!menu&&!paused&&over<0&&performance.now()-cpMouseT>2000;if(h!=cpCurH){cpCurH=h;document.body.style.cursor=h?'none':''}},400);
-function cpLeave(){cpPauseIf();if(AC&&AC.state=='running')AC.suspend().catch(()=>{})}
-function cpBack(){if(document.hidden||!document.hasFocus())return;if(AC&&AC.state=='suspended')AC.resume().catch(()=>{});cpWake()}
+function cpLeave(){cpPauseIf();if(cpMuE)cpMuE.pause();if(AC&&AC.state=='running')AC.suspend().catch(()=>{})}
+function cpBack(){if(document.hidden||!document.hasFocus())return;if(AC&&AC.state=='suspended')AC.resume().catch(()=>{});cpMuPlay();cpWake()}
 addEventListener('blur',cpLeave);addEventListener('pagehide',cpLeave);addEventListener('focus',cpBack);addEventListener('pageshow',cpBack);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cpLeave();else cpBack()});
 addEventListener('contextmenu',e=>e.preventDefault());
@@ -518,11 +518,12 @@ function tone(f,d,type,v,f2,delay,bus){if(!AC)return;const t=AC.currentTime+(del
  o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
  gn.gain.setValueAtTime(v||.1,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);
  o.connect(gn);gn.connect(bus||cpFxG||AC.destination);o.start(t);o.stop(t+d+.02)}
-const MEL=[0,4,7,4,5,9,12,9,7,11,14,11,12,null,7,null,0,4,7,12,9,5,9,null,7,2,5,7,0,null,null,null],BAS=[-24,-24,-19,-19,-17,-17,-19,-19];
-function startMusic(){const f=()=>{setTimeout(f,cpMT());if(!cpS.mv||!AC)return;const n=MEL[mstep%32];if(cpMT()<200&&mstep%2==0)noise(.04,.035,'highpass',6000,0,0,cpMuG);
- if(n!==null)tone(261.63*Math.pow(2,n/12),.2,'triangle',.05,0,0,cpMuG);
- if(mstep%4==0)tone(261.63*Math.pow(2,BAS[(mstep/4|0)%8]/12),.45,'sine',.09,0,0,cpMuG);
- mstep++};f()}
+// Musik: Datei music.mp3 als Schleife (Element cpMuE -> Daempfung cpMuD -> cpMuG). Lobby/Pause leiser, Schlussphase (cpMT) etwas schneller.
+let cpMuE=null,cpMuD=null;
+function startMusic(){try{cpMuE=new Audio('music.mp3?v=1');cpMuE.loop=true;cpMuE.preload='auto';cpMuD=AC.createGain();cpMuD.gain.value=.5;AC.createMediaElementSource(cpMuE).connect(cpMuD);cpMuD.connect(cpMuG);cpMuPlay()}catch(e){}
+ setInterval(cpMuTick,250)}
+function cpMuPlay(){if(cpMuE&&cpMuE.paused&&!document.hidden)cpMuE.play().catch(()=>{})}
+function cpMuTick(){if(!cpMuD)return;const g=(menu||paused)?.5:1;cpMuD.gain.setTargetAtTime(g,AC.currentTime,.3);const r=cpMT()<200?1.08:1;if(cpMuE.playbackRate!=r)cpMuE.playbackRate=r}
 // Rauschen (gemeinsamer Puffer NB) fuer Schlag-/Schwung-Toene
 let NB=null;function noise(d,v,typ,f1,f2,delay,bus,q){if(!AC)return;if(!NB){NB=AC.createBuffer(1,AC.sampleRate*.5|0,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),gn=AC.createGain();s.buffer=NB;f.type=typ||'lowpass';f.Q.value=q||1;f.frequency.setValueAtTime(f1,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+d);gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(gn);gn.connect(bus||cpFxG||AC.destination);s.start(t);s.stop(t+d+.02)}
 const SFT={};
